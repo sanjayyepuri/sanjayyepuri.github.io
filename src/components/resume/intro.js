@@ -7,9 +7,7 @@ import { Arrow } from "@carbonplan/icons";
 import ArrowButton from "../arrowbutton";
 
 const Intro = () => (
-  <Box
-    mb={[5, 8]}
-  >
+  <Box mb={[5, 8]}>
     <Box
       sx={{
         position: "absolute",
@@ -45,15 +43,18 @@ const Intro = () => (
           }}
         >
           <Text>
-            I’m a new grad from the University of Texas at Austin. I majored in
-            Computer Science and Mathematics. Feel free to shoot me an email if
-            you have anything to say, interesting articles, job opportunities,
-            etc.
+            I’m a software engineer with a CS and Math degree from UT Austin.
+            I’ve been in the industry for four years now and always love
+            chatting about tech, cool articles, or new opportunities. Feel free
+            to reach out!
           </Text>
 
           <Box mt={[4]}>
             <Link to={"/blog"}>
-              <ArrowButton sx={{ color: "grey" }} size="md" > Blog </ArrowButton>
+              <ArrowButton sx={{ color: "grey" }} size="md">
+                {" "}
+                Blog{" "}
+              </ArrowButton>
             </Link>
           </Box>
         </Box>
