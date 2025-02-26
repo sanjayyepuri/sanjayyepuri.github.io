@@ -43,8 +43,8 @@ const Footer = () => (
         <Column start={[1, 1, 2, 2]} width={[3, 3]}>
           <Box>
             <Label> EMAIL </Label>
-            <Themed.a href="mailto:sanjay@cs.utexas.edu" as="a">
-              sanjay@cs.utexas.edu
+            <Themed.a href="mailto:sanjay.yepuri@gmail.com" as="a">
+              sanjay.yepuri@gmail.com
             </Themed.a>
           </Box>
         </Column>

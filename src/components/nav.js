@@ -39,12 +39,12 @@ const Navbar = () => (
       <Heading
         sx={{
           fontWeight: "bold",
-          fontSize: [4, 4, 4, 4],
+          fontSize: [2, 2, 2, 2],
         }}
       >
         <Link to={"/"}>
           <Text sx={{ color: "primary" }}>
-            <Text sx={{ fontFamily: "mono", fontSpacing:"mono", color: "blue" }}>sanjay</Text> {" "}
+            <Text sx={{ fontFamily: "mono", fontSpacing:"mono", color: "blue" }}>/home/sanjay</Text> {" "}
           </Text>
         </Link>
       </Heading>
