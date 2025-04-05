@@ -5,7 +5,7 @@ import { Row, Column, Callout } from "@carbonplan/components";
 
 const Projects = () => (
   <Box id="projects" mt={[3, 2, 6, 6]} mb={[3, 2, 6, 6]}>
-    <Row mb={[1, 2]}>
+    <Row mb={[2, 3]}>
       <Column start={[1, 1, 2, 2]} width={[3]}>
         <Heading
           sx={{
@@ -17,7 +17,7 @@ const Projects = () => (
         </Heading>
       </Column>
     </Row>
-    <Row>
+    <Row mb={[3, 4]}>
       <Column
         start={[1, 1, 2, 2]}
         sx={{
@@ -41,13 +41,15 @@ const Projects = () => (
       <Column start={[2, 2, 3, 3]} width={[3]}>
         <a href="/particles" target="_blank">
           <Callout color="primary" label="/particles">
-            <Text sx={{ fontFamily: "heading" }}>Fast Fluid Dynamics</Text>
+            <Heading sx={{ mb: 2, fontSize: "1.5rem" }}>
+              Particle Physics
+            </Heading>
             Playground for physics simulations
           </Callout>
         </a>
       </Column>
     </Row>
-    <Row>
+    <Row mb={[3, 4]}>
       <Column
         start={[1, 1, 2, 2]}
         sx={{
@@ -86,7 +88,9 @@ const Projects = () => (
       <Column start={[2, 2, 3, 3]} width={[3]}>
         <a href="/fluids" target="_blank">
           <Callout color="primary" label="/fluids">
-            <Text sx={{ fontFamily: "heading" }}>Fast Fluid Dynamics</Text>
+            <Heading sx={{ mb: 2, fontSize: "1.5rem" }}>
+              Fast Fluid Dynamics
+            </Heading>
             A Fast Fluid Dynamics Implementation in Rust+WASM and WebGL
           </Callout>
         </a>
