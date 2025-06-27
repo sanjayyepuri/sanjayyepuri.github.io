@@ -34,7 +34,6 @@ const CourseWork = () => (
         </Heading>
       </Column>
     </Row>
-
     <Row>
       <Column start={[1, 1, 2, 2]} width={[6, 7, 8, 8]}>
         <Text

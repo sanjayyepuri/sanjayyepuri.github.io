@@ -43,10 +43,10 @@ const Intro = () => (
           }}
         >
           <Text>
-            I’m a software engineer with a CS and Math degree from UT Austin.
-            I’ve been in the industry for four years now and always love
-            chatting about tech, cool articles, or new opportunities. Feel free
-            to reach out!
+            I’m a software engineer with degrees in Math and Computer Science
+            from UT Austin. I’ve been in the industry for four years now and
+            always love chatting about tech, cool articles, or new
+            opportunities. Feel free to reach out!
           </Text>
 
           <Box mt={[4]}>

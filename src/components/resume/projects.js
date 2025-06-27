@@ -97,20 +97,21 @@ const Projects = () => (
     <Row mb={[3, 4]}>
       <Column start={[1, 2]} width={[3]}>
         <Project
-          href="/particles"
-          svg={ParticlesSVG}
-          calloutLabel="/particles"
-          title="Particle Physics"
-          description="Playground for physics simulations"
-        />
-      </Column>
-      <Column start={[4, 5]} width={[3]}>
-        <Project
           href="/fluids"
           svg={FluidsSVG}
           calloutLabel="/fluids"
           title="Fast Fluid Dynamics"
           description="A Fast Fluid Dynamics Implementation in Rust+WASM and WebGL"
+        />
+
+      </Column>
+      <Column start={[4, 5]} width={[3]}>
+        <Project
+          href="/particles"
+          svg={ParticlesSVG}
+          calloutLabel="/particles"
+          title="Particle Physics"
+          description="Playground for physics simulations"
         />
       </Column>
     </Row>

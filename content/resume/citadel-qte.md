@@ -1,10 +1,10 @@
 ---
 role: Quantitative Trading Engineer
-title: GQS | Citadel
+title: Citadel | GQS
 start: Aug 2021
-end: Present
+end: June 2025
 
-date: 2051-08-01
+date: 2025-06-01
 
 type: job
 ---
