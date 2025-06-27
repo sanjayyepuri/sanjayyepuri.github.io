@@ -34,7 +34,7 @@ A side effect is that I can then communicate with experts. They are the individu
 Finally, I always find myself trying to find inspiration in other spaces. It is rare to discover a new class of problem; most of the time, the problem has been solved or there is a parallel problem with a solution. Even when I feel I discovered something novel, the solution is usually an iteration on a previously seen pattern. When I come across a relevant project, I start by understanding the project structure and documentation. Then, I look for the abstractions and try to reverse engineer the intention.
 
 Taking these three steps, I can model problems with great accuracy. The abstractions create a “new semantic level” or language that can be composed to solve more complex problems in the domain. These problems and their solutions can now be expressed in the simplest terms.
-How I Decompose Problems
+## How I Decompose Problems
 I approach writing code fairly mathematically. By this, I mean that I like the idea of building out primitives which I can reason about. I just need to prove the correctness once and have an understanding of the required assumptions. Then I can combine these primitives to assert more complex facts about the world. I found this approach works great across all domains: from building large distributed systems to the simplest scripts.
 
 This leads to nicely factored solutions that generally can be reused. When a new variant appears, usually the code is generic to handle it automatically. If not, it usually requires specializing the existing operations that are already defined. This means that iterations or new features are quick to implement and can reuse the existing proofs of correctness or testing frameworks.
