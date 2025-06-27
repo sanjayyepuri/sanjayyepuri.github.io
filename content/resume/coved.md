@@ -1,6 +1,6 @@
 ---
 title: Coved
-role: CTO
+role: Co-Founder & CTO
 start: Apr 2020
 end: Dec 2022
 type: job
