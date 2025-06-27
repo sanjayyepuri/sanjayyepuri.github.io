@@ -4,6 +4,7 @@ module.exports = {
   siteMetadata: {
     title: "personal-site",
   },
+  trailingSlash: "always",
   plugins: [
     `gatsby-plugin-sharp`,
     "gatsby-plugin-theme-ui",
