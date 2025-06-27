@@ -50,4 +50,4 @@ While I may not share Dijkstra's humble attitude, the principles I've outlined�
 
 Clearly, an AI generated that paragraph. The real conclusion is that I am not a humble programmer, but one that loves to dream.
 
-If you somehow got this far, you must be wondering who I am. I think for the purpose of this essay, I’m just a passionate programmer who has been building their entire life. I would do this even if I was not paid (and I have). I want to build as many things before my time is up. Not necessarily projects that are useful, but something I would look back on and think: I can’t believe I did that.
+If you somehow got this far, you must be wondering who I am. I think for the purpose of this essay, I’m just a passionate programmer who has been building their entire life. I would do this even if I was not paid (and I have). I want to build as many things as possible before my time is up. Not necessarily projects that are useful, but something I would look back on and think: I can’t believe I did that.
