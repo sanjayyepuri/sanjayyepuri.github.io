@@ -1,6 +1,6 @@
 name: Publish Github Pages
 
-on: 
+on:
   push:
     branches: [ main ]
 
@@ -15,11 +15,11 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '24'
           cache: yarn
 
       - name: Build
-        run: | 
+        run: |
           yarn
           yarn build
       - name: Deploy
