@@ -30,6 +30,9 @@ const Value = ({ mode }) => {
   const [display, setDisplay] = useState(init(mode))
 
   useEffect(() => {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') return
+    
     if (mode === 'mouse') {
       const setFromEvent = (e) => {
         const x = format(e.clientX, 4)
@@ -74,8 +77,12 @@ const Value = ({ mode }) => {
 
 const Metadata = ({ mode }) => {
   const { theme } = useThemeUI()
-
-  const color = theme.rawColors.secondary
+  const color = theme?.rawColors?.secondary || theme?.colors?.secondary || '#666'
+  
+  // Guard against SSR issues
+  if (typeof window === 'undefined') {
+    return null
+  }
 
   return (
     <Box
@@ -131,7 +138,8 @@ function format(num, pad) {
   return num.toString().padStart(pad, '0')
 }
 
-function scrollFraction(window, documnt) {
+function scrollFraction(window, document) {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return 0
   return Math.min(window.scrollY / (document.body.offsetHeight - 770), 0.99)
 }
 

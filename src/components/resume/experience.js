@@ -4,12 +4,11 @@ import { Box, Text, Heading } from "theme-ui";
 import { Expander, Row, Column } from "@carbonplan/components";
 import { graphql, useStaticQuery } from "gatsby";
 import AnimateHeight from "react-animate-height";
-import { MDXRenderer } from "gatsby-plugin-mdx";
 
 const Job = ({ job }) => {
   const [expanded, setExpanded] = React.useState(false);
 
-  const { body, frontmatter } = job;
+  const { frontmatter, body, excerpt } = job;
 
   return (
     <Box>
@@ -68,8 +67,34 @@ const Job = ({ job }) => {
       </Box>
 
       <AnimateHeight height={expanded ? "auto" : 0}>
-        <Box>
-          <MDXRenderer>{job.body}</MDXRenderer>
+        <Box sx={{ 
+          p: 3,
+          '& > *': { mb: 2 },
+          '& p': { 
+            mb: 2,
+            lineHeight: 1.5 
+          },
+          '& ul, & ol': {
+            pl: 4,
+            mb: 2
+          },
+          '& li': {
+            mb: 1
+          }
+        }}>
+          {excerpt ? (
+            <Box 
+              sx={{
+                '& p': { mb: 2, lineHeight: 1.5 },
+                '& ul': { pl: 4, mb: 2 },
+                '& li': { mb: 1 }
+              }}
+            >
+              <Text sx={{ whiteSpace: 'pre-wrap' }}>{excerpt}</Text>
+            </Box>
+          ) : (
+            <Text>Job description content would go here.</Text>
+          )}
         </Box>
       </AnimateHeight>
       <hr />
@@ -81,11 +106,12 @@ const Experience = () => {
   const data = useStaticQuery(graphql`
     {
       experience: allMdx(
-        sort: { fields: frontmatter___date, order: DESC }
+        sort: { frontmatter: { date: DESC } }
         filter: { frontmatter: { type: { eq: "job" } } }
       ) {
         jobs: nodes {
           body
+          excerpt(pruneLength: 400)
           frontmatter {
             title
             role
@@ -113,8 +139,8 @@ const Experience = () => {
       </Row>
       <Row mb={[1, 2]}>
         <Column start={[1, 1, 2, 2]} width={[6, 7, 8, 8]}>
-          {data.experience.jobs.map((job) => (
-            <Job job={job} />
+          {data.experience.jobs.map((job, index) => (
+            <Job key={index} job={job} />
           ))}
         </Column>
       </Row>

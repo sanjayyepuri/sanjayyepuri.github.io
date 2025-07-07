@@ -3,7 +3,7 @@ import React from "react";
 import { Box, Container, Flex } from "theme-ui";
 import { Dimmer, FadeIn, Guide } from "@carbonplan/components";
 
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 
 import Navbar from "./nav";
 import Footerbar from "./footer";

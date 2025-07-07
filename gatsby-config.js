@@ -6,6 +6,7 @@ module.exports = {
   },
   plugins: [
     `gatsby-plugin-sharp`,
+    `gatsby-transformer-sharp`,
     "gatsby-plugin-theme-ui",
     {
       resolve: "gatsby-source-filesystem",
@@ -28,19 +29,20 @@ module.exports = {
         name: `resume`,
       },
     },
-    "gatsby-remark-images",
     {
       resolve: "gatsby-plugin-mdx",
       options: {
         extensions: [".md", ".mdx"],
         gatsbyRemarkPlugins: [
-          "gatsby-remark-images",
+          {
+            resolve: "gatsby-remark-images",
+            options: {
+              maxWidth: 1200,
+            },
+          },
           "gatsby-remark-prismjs",
+          "gatsby-remark-katex",
         ],
-        remarkPlugins: [
-          require("remark-math"),
-          require("remark-html-katex")
-        ]
       },
     },
     {

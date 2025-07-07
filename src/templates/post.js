@@ -1,22 +1,21 @@
 /** @jsx jsx */
-import { jsx } from "theme-ui"; 
+import { jsx } from "theme-ui";
+import React from "react";
 
 import { graphql, Link } from "gatsby";
+import { MDXProvider } from "@mdx-js/react";
 
 import "katex/dist/katex.min.css";
 
 import Layout from "../components/layout";
 
-import { MDXRenderer } from "gatsby-plugin-mdx";
-
 import { Box, Text } from "theme-ui";
 import { Column, Row, Button } from "@carbonplan/components";
 import { Left } from "@carbonplan/icons";
 
-const Post = ({ data }) => {
+const Post = ({ data, children }) => {
   const { blog } = data;
-  const [{ body, frontmatter }] = blog.nodes;
-  console.log(frontmatter);
+  const [{ frontmatter }] = blog.nodes;
 
   return (
     <Layout mode="scroll">
@@ -46,7 +45,7 @@ const Post = ({ data }) => {
           >
             {frontmatter.title}
           </Box>
-          <MDXRenderer>{ body }</MDXRenderer>
+          <MDXProvider>{ children }</MDXProvider>
         </Column>
 
         <Column start={[1, 8, 10, 10]} width={[2, 2, 2, 2]}>
@@ -79,9 +78,8 @@ export default Post;
 
 export const query = graphql`
   query BlogQuery($slug: String!) {
-    blog: allMdx(filter: { slug: { eq: $slug } }) {
+    blog: allMdx(filter: { fields: { slug: { eq: $slug } } }) {
       nodes {
-        body
         frontmatter {
           date
           title

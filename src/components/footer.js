@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Box, Container, Themed } from "theme-ui";
+import { Box, Container, Link } from "theme-ui";
 import { Column, Row } from "@carbonplan/components";
 
 import ArrowButton from "./arrowbutton";
@@ -43,28 +43,28 @@ const Footer = () => (
         <Column start={[1, 1, 2, 2]} width={[3, 3]}>
           <Box>
             <Label> EMAIL </Label>
-            <Themed.a href="mailto:sanjay.yepuri@gmail.com" as="a">
+            <Link href="mailto:sanjay.yepuri@gmail.com">
               sanjay.yepuri@gmail.com
-            </Themed.a>
+            </Link>
           </Box>
         </Column>
         <Column start={[1, 4, 5, 5]} width={[3, 3]} sx={{ mt: [3, 0, 0, 0] }}>
           <Box>
             <Label>GITHUB</Label>
-            <Themed.a href="https://github.com/sanjayyepuri" target="_blank">
+            <Link href="https://github.com/sanjayyepuri" target="_blank">
               github.com/sanjayyepuri
-            </Themed.a>
+            </Link>
           </Box>
         </Column>
         {/* <Column start={[1, 7, 8, 8]} width={[2, 3]} sx={{ mt: [3, 0, 0, 0] }}>
           <Box>
             <Label>LINKEDIN</Label>
-            <Themed.a
+            <Link
               href="https://linkedin.com/in/sanjay-yepuri/"
               target="_blank"
             >
               linkedin.com/in/sanjay-yepuri/
-            </Themed.a>
+            </Link>
           </Box>
         </Column> */}
       </Row>
