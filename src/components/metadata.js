@@ -80,9 +80,8 @@ const Metadata = ({ mode }) => {
   const color = theme?.rawColors?.secondary || theme?.colors?.secondary || '#666'
   
   // Guard against SSR issues
-  if (typeof window === 'undefined') {
-    return null
-  }
+  // Ensure static parts of the component render during SSR
+  const isBrowser = typeof window !== 'undefined';
 
   return (
     <Box
