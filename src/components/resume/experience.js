@@ -139,8 +139,8 @@ const Experience = () => {
       </Row>
       <Row mb={[1, 2]}>
         <Column start={[1, 1, 2, 2]} width={[6, 7, 8, 8]}>
-          {data.experience.jobs.map((job, index) => (
-            <Job key={index} job={job} />
+          {data.experience.jobs.map((job) => (
+            <Job key={job.frontmatter.title} job={job} />
           ))}
         </Column>
       </Row>
