@@ -8,7 +8,7 @@ import AnimateHeight from "react-animate-height";
 const Job = ({ job }) => {
   const [expanded, setExpanded] = React.useState(false);
 
-  const { frontmatter, body, excerpt } = job;
+  const { frontmatter, excerpt } = job;
 
   return (
     <Box>
