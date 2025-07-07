@@ -33,8 +33,7 @@ On a computer we represent a fluid as a 2D array of velocity vectors (or in the 
 
 In our implementation, these passes are fragment shaders written in GLSL. The velocity vector field is stored as a floating point RGB texture that is passed as a uniform to each shader program; the new vector field is then rendered to another texture. In order to be efficient, each pass has two textures which alternate as input and output. After we output the final velocity field, we advect the color field which is ultimately rendered to the screen.
 
-<!-- <img class="no-shadow" src="/assets/fluid-shader-pipeline.png"> -->
-![](../assets/fluid-shader-pipeline.png)
+![Diagram illustrating the fluid shader pipeline, showing the flow of data between textures and shader programs.](../assets/fluid-shader-pipeline.png)
 
 ### Shader Programs
 

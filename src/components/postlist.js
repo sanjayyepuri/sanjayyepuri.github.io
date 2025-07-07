@@ -10,7 +10,7 @@ const PostPreview = ({ post, divider = true }) => (
   <Box>
     <Row mb={[1, 2]}>
       <Column start={[1, 1, 2, 2]} width={[6, 6, 8, 12]}>
-        <Link to={`/blog/${post.slug}`}>
+        <Link to={`/blog${post.fields.slug}`}>
           <ArrowButton size="lg">{post.frontmatter.title}</ArrowButton>
         </Link>
       </Column>
@@ -44,11 +44,13 @@ const PostList = () => {
   const data = useStaticQuery(graphql`
     {
       blog: allMdx(
-        sort: { fields: frontmatter___date, order: DESC }
+        sort: { frontmatter: { date: DESC } }
         filter: { frontmatter: { type: { eq: "post" } } }
       ) {
         posts: nodes {
-          slug
+          fields {
+            slug
+          }
           excerpt
           frontmatter {
             date
