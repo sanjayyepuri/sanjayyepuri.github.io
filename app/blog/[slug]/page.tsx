@@ -14,7 +14,7 @@ export async function generateStaticParams() {
 export function generateMetadata({ params }) {
   let post = getBlogPosts().find((post) => post.slug === params.slug)
   if (!post) {
-    return
+    return {}
   }
 
   let {
@@ -34,17 +34,17 @@ export function generateMetadata({ params }) {
       type: 'article',
       publishedTime,
       url: `${baseUrl}/blog/${post.slug}`,
-      images: [
+      images: ogImage ? [
         {
           url: ogImage,
         },
-      ],
+      ] : undefined,
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [ogImage],
+      images: ogImage ? [ogImage] : undefined,
     },
   }
 }
@@ -75,7 +75,7 @@ export default function Blog({ params }) {
             url: `${baseUrl}/blog/${post.slug}`,
             author: {
               '@type': 'Person',
-              name: 'My Portfolio',
+              name: post.metadata.author || 'Sanjay Yepuri',
             },
           }),
         }}
@@ -84,9 +84,12 @@ export default function Blog({ params }) {
         {post.metadata.title}
       </h1>
       <div className="flex justify-between items-center mt-2 mb-8 text-sm">
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
-          {formatDate(post.metadata.publishedAt)}
-        </p>
+        <div className="text-sm text-neutral-600 dark:text-neutral-400">
+          <p>{formatDate(post.metadata.publishedAt)}</p>
+          {post.metadata.author && (
+            <p className="mt-1">{post.metadata.author}</p>
+          )}
+        </div>
       </div>
       <article className="prose">
         <CustomMDX source={post.content} />
