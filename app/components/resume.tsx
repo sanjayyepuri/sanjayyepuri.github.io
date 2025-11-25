@@ -7,19 +7,19 @@ const experienceItems: Array<{
   {
     title: "Quantitative Research Engineer",
     company: "Citadel | GQS",
-    startDate: "June 2025",
+    startDate: "Jun. 2025",
     endDate: "Present",
   },
   {
     title: "Quantitative Trading Engineer",
     company: "Citadel | GQS",
     startDate: "Aug. 2021",
-    endDate: "June 2025",
+    endDate: "Jun. 2025",
   },
   {
     title: "Co-Founder and CTO",
     company: "CovEd",
-    startDate: "April 2020",
+    startDate: "Apr. 2020",
     endDate: "Dec. 2022",
   },
 ];
@@ -31,7 +31,7 @@ export function ExperienceList() {
         <li className="flex my-2" key={index}>
           <div className="flex-1">
             <h3>{experience.title}</h3>
-            <p className="text-sm text-gray-800 dark:text-gray-500">
+            <p className="text-sm text-gray-800 dark:text-gray-500 uppercase">
               {experience.startDate} - {experience.endDate}
             </p>
           </div>

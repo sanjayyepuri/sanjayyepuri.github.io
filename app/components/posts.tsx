@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { formatDate, getBlogPosts } from 'app/blog/utils'
+import { formatDate, getBlogPosts } from 'app/writing/utils'
 
 export function BlogPosts() {
   let allBlogs = getBlogPosts()
@@ -19,7 +19,7 @@ export function BlogPosts() {
           <Link
             key={post.slug}
             className="flex hover:underline"
-            href={`/blog/${post.slug}`}
+            href={`/writing/${post.slug}`}
           >
             <div className="flex-1">
               <h3>{post.metadata.title}</h3>

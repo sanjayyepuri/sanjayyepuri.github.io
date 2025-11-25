@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { CustomMDX } from 'app/components/mdx'
-import { formatDate, getBlogPosts } from 'app/blog/utils'
+import { formatDate, getBlogPosts } from 'app/writing/utils'
 import { baseUrl } from 'app/sitemap'
 
 export async function generateStaticParams() {
@@ -80,7 +80,7 @@ export default function Blog({ params }) {
           }),
         }}
       />
-      <h1 className="title font-semibold text-2xl tracking-tighter">
+      <h1 className="section-header title tracking-tighter">
         {post.metadata.title}
       </h1>
       <div className="flex justify-between items-center mt-2 mb-8 text-sm">

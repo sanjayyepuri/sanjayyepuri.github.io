@@ -45,6 +45,18 @@ export default function Footer() {
       <p className="mt-8 text-neutral-600 dark:text-neutral-300">
         © {new Date().getFullYear()} Sanjay Yepuri
       </p>
+      <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+        Typeset in{' '}
+        <a
+          href="https://departuremono.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-neutral-800 dark:hover:text-neutral-200 transition-all"
+        >
+          Departure Mono
+        </a>{' '}
+        by Helena Zhang
+      </p>
     </footer>
   )
 }
