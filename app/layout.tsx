@@ -67,7 +67,7 @@ export default function RootLayout({
           <Navbar />
           <div className="flex gap-4">
             <h1 className="writing-mode-vertical flex-shrink-0 tracking-tighter sticky self-start hidden sm:block" style={{ top: '2rem', fontSize: '22px' }}>
-              sanjay <span> • chasing light </span>
+              sanjay <span> • engineering </span>
             </h1>
             <div className="flex-1">
               {children}

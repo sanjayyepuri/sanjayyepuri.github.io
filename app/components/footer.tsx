@@ -42,10 +42,13 @@ export default function Footer() {
           </a>
         </li>
       </ul>
-      <p className="mt-8 text-neutral-600 dark:text-neutral-300">
-        © {new Date().getFullYear()} Sanjay Yepuri
+      <p className="text-xs uppercase mt-8 text-neutral-600 dark:text-neutral-300">
+        © {new Date().getFullYear()} Sanjay Yepuri <span>• chasing light</span>
+
       </p>
-      <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+      <p className="text-xs uppercase mt-2 text-neutral-500 dark:text-neutral-400">
+      </p>
+      <p className="text-xs uppercase mt-2 text-neutral-500 dark:text-neutral-400">
         Typeset in{' '}
         <a
           href="https://departuremono.com/"
