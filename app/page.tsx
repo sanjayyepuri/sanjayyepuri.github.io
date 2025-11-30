@@ -9,7 +9,7 @@ export default function Page() {
         sanjay <span> • chasing light </span>
       </h1>
       <p className="mb-8 text-[22px] leading-tight">
-        {`Just another guy whos love building...
+        {`Just another guy who love building...
         `}
       </p>
       <div className="my-8">
