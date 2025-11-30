@@ -7,8 +7,8 @@ const experienceItems: Array<{
   {
     title: "Quantitative Research Engineer",
     company: "Citadel | GQS",
-    startDate: "Present",
-    endDate: "Jun. 2025",
+    startDate: "Aug. 2021",
+    endDate: "Present",
   },
   {
     title: "Co-Founder and CTO",
