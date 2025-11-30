@@ -7,13 +7,7 @@ const experienceItems: Array<{
   {
     title: "Quantitative Research Engineer",
     company: "Citadel | GQS",
-    startDate: "Jun. 2025",
-    endDate: "Present",
-  },
-  {
-    title: "Quantitative Trading Engineer",
-    company: "Citadel | GQS",
-    startDate: "Aug. 2021",
+    startDate: "Present",
     endDate: "Jun. 2025",
   },
   {

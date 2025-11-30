@@ -9,8 +9,7 @@ export default function Page() {
         sanjay <span> • chasing light </span>
       </h1>
       <p className="mb-8 text-[22px] leading-tight">
-        {`I build fast and aggressively simple systems. My life lives at the intersection of mathematics, code, and design.
-          I believe in first principles, deliberate craftsmanship, and ideas that endure. The rest is just implementation detail.
+        {`Just another guy whos love building...
         `}
       </p>
       <div className="my-8">
