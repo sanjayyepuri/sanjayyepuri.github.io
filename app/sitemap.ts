@@ -1,22 +1,24 @@
-import { getBlogPosts } from 'app/writing/utils'
+import { getBlogPosts } from "app/writing/utils";
+
+export const dynamic = "force-static";
 
 // Ensure basePath is available at static compilation time
-export const basePath = process.env.NEXT_PUBLIC_PAGES_BASE_PATH || ''
+export const basePath = process.env.NEXT_PUBLIC_PAGES_BASE_PATH || "";
 
 export const baseUrl = basePath
-  ? `https://sanjay.engineering${basePath}`
-  : 'https://sanjay.engineering'
+    ? `https://sanjay.engineering${basePath}`
+    : "https://sanjay.engineering";
 
 export default async function sitemap() {
-  let blogs = getBlogPosts().map((post) => ({
-    url: `${baseUrl}/writing/${post.slug}`,
-    lastModified: post.metadata.publishedAt,
-  }))
+    let blogs = getBlogPosts().map((post) => ({
+        url: `${baseUrl}/writing/${post.slug}`,
+        lastModified: post.metadata.publishedAt,
+    }));
 
-  let routes = ['', '/writing'].map((route) => ({
-    url: `${baseUrl}${route}`,
-    lastModified: new Date().toISOString().split('T')[0],
-  }))
+    let routes = ["", "/writing"].map((route) => ({
+        url: `${baseUrl}${route}`,
+        lastModified: new Date().toISOString().split("T")[0],
+    }));
 
-  return [...routes, ...blogs]
+    return [...routes, ...blogs];
 }
