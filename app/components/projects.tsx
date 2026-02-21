@@ -1,6 +1,11 @@
 export function ProjectList() {
   const projects = [
     {
+      title: "sanjay.party",
+      url: "https://sanjay.party",
+      description: "Invitations to my parties"
+    },
+    {
       title: "N-Body Simulation",
       url: "https://sanjay.engineering/particles",
       description: "Physics-based particle system"
