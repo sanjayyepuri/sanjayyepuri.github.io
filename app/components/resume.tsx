@@ -5,10 +5,16 @@ const experienceItems: Array<{
   endDate: string;
 }> = [
   {
+    title: "Software Engineer",
+    company: "Chalk",
+    startDate: "Jan. 2026",
+    endDate: "Present",
+  },
+  {
     title: "Quantitative Research Engineer",
     company: "Citadel | GQS",
     startDate: "Aug. 2021",
-    endDate: "Present",
+    endDate: "Jan. 2026",
   },
   {
     title: "Co-Founder and CTO",
