@@ -1,0 +1,33 @@
+---
+title: Design Rot
+publishedAt: 2026-09-20
+author: Sanjay Yepuri
+type: post
+---
+Design is the practice of making intentions, possibilities, and constraints legible. It gives people a way to understand how objects, systems, and environments relate to them—and to one another. Without thoughtful design, meaning does not disappear, but it becomes harder to discover, share, and act on.
+
+Software design has no different from design found in any other domain. Engineers use design as common language to reason about the system as it exists, decide how it should change, and prevent complexity from collapsing into amorphous code. It's never about the architecture or code itself, but everything that shapes how the system operates and people interact with it.
+
+I rely heavily on design to reason through my hardest problems. Code often contains too much noise to be a useful starting point, so I take out a notebook and sketch the system: the components involved, the boundaries between them, and the relationships I need to understand. From that structure, I can identify the properties and behaviors of the existing design, decide what must change, and plan how to produce the desired behavior. Implementation, then, becomes far more mechanical. LLMs have accelerated the speed at which design can become reality.
+
+My easiest problems don't generally require the design step; they can be solved by composing existing algebras to generate the behavior I want. When the rules of the system change, the problem becomes a design problem again—and I return to my notebook. This leads to a simple definition of quality: a design is good for as along as it supports new behavior without changing the fundamental algebras.
+
+A design with this quality accelerates how quickly I can build software. The speed at which I can experiment and ship software is incredible when I don't have to reason about fundamental assumptions all the time. I believe this pace is not counter to building high quality software. In fact, it's this sort of software I feel demonstrates sophistication through its simplicity. 
+
+LLMs have revolutionized how we build software. They shorten the loop between reasoning about design and turning it into a working system, allowing us to explore and ship ideas far more quickly.
+
+Theres's a catch though; an LLM can take humans out of the design loop. When asked to implement a feature, they simply makes it work. LLMs may produce a plausible design rationale when prompted, but they does not reliably stop, challenge the existing structure, and ask whether it should be reconsidered. Most of the time, that's fine: the existing design works. But when it doesn't, LLMs can still produce a locally correct solution, that causes the design to drift the long term vision. This is *design rot*.
+
+As a reviewer, I am responsible for identifying design rot; really, only the original idea generators are the only ones with the context and knowledge to understand how the design should be iterated upon. LLMs are great but they do not have good taste for design. Even when prompted with explicit goals. I am certain there is a future this limitation is fixed; however, as of writing, LLMs still cannot produce coherent designs.
+
+Design rots has a terrifying positive feedback loop. As it decays, the code becomes harder to reason about and it becomes harder to spot the next compromise in the subsequent review. It is no different from context rot, but for humans. As the understanding of the system diminishes, it becomes harder and harder for the team correct its own mistakes.
+
+Eventually, development slows to a crawl. More time is spent fixing bugs that appear to come out of nowhere. If the pressure to deliver remains unchanged, the team can slide into a death march.
+
+Is this simply a rebranding of technical debt? Potentially — but I think design rot is a specific instance of it. Technical debt is often an intentional tradeoff. We may have to accept a suboptimal implementation to hit a tough time constraint. Design rot is different. It accumulates through individually reasonable changes while quietly weakening the system’s overall structure. With LLMs, this can happen incredibly fast. The rot is not invisible, but it is easy to miss unless someone is evaluating each change against the intended design. After all, the LLM is trained to produce results that *look* reasonable to humans.
+
+The solution is simple: understand the system's design and review the code. Not just for behavioral correctness, but also for whether the change makes sense in the broader picture. It's when the team has an shared understanding how it all comes together, they can keep the system from drifting from the original design.
+
+In today’s software environment, design is central to keeping systems legible. Without it, the code’s structure and intent become harder to understand, and development slows. Teams must keep design intentional and protect its integrity as the code evolves. 
+
+Now, go design something. Coding is solved.
