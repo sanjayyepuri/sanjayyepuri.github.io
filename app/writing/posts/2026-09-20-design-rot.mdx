@@ -16,11 +16,11 @@ A design with this quality accelerates how quickly I can build software. The spe
 
 LLMs have revolutionized how we build software. They shorten the loop between reasoning about design and turning it into a working system, allowing us to explore and ship ideas far more quickly.
 
-Theres's a catch though; an LLM can take humans out of the design loop. When asked to implement a feature, they simply makes it work. LLMs may produce a plausible design rationale when prompted, but they does not reliably stop, challenge the existing structure, and ask whether it should be reconsidered. Most of the time, that's fine: the existing design works. But when it doesn't, LLMs can still produce a locally correct solution, that causes the design to drift the long term vision. This is *design rot*.
+Theres's a catch though; an LLM can take humans out of the design loop. When asked to implement a feature, they simply makes it work. LLMs may produce a plausible design rationale when prompted, but they does not reliably stop, challenge the existing structure, and ask whether it should be reconsidered. Most of the time, that's fine: the existing design works. But when it doesn't, LLMs can still produce a locally correct solution that causes the design to drift from the long term vision. This is *design rot*.
 
 As a reviewer, I am responsible for identifying design rot; really, only the original idea generators are the only ones with the context and knowledge to understand how the design should be iterated upon. LLMs are great but they do not have good taste for design. Even when prompted with explicit goals. I am certain there is a future this limitation is fixed; however, as of writing, LLMs still cannot produce coherent designs.
 
-Design rots has a terrifying positive feedback loop. As it decays, the code becomes harder to reason about and it becomes harder to spot the next compromise in the subsequent review. It is no different from context rot, but for humans. As the understanding of the system diminishes, it becomes harder and harder for the team correct its own mistakes.
+Design rot has a terrifying positive feedback loop. As it decays, the code becomes harder to reason about and it becomes harder to spot the next compromise in the subsequent review. It is no different from context rot, but for humans. As the understanding of the system diminishes, it becomes harder and harder for the team correct its own mistakes.
 
 Eventually, development slows to a crawl. More time is spent fixing bugs that appear to come out of nowhere. If the pressure to deliver remains unchanged, the team can slide into a death march.
 
