@@ -57,7 +57,7 @@ export default function Blog({ params }) {
   }
 
   return (
-    <section>
+    <section className={post.slug === '2026-10-17-gpu-parquet' ? 'technical-post' : undefined}>
       <script
         type="application/ld+json"
         suppressHydrationWarning
