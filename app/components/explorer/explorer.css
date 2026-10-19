@@ -1,0 +1,57 @@
+.embedded-explorer {
+  --plot-ink: #252525;
+  --plot-muted: #303030;
+  --plot-rule: #2223;
+  --plot-soft: #2222220a;
+  --plot-accent: #00515d;
+  color: var(--plot-ink);
+  margin: 1.5rem 0;
+  padding: .5rem 0;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+.dark .embedded-explorer {
+  --plot-ink: #e5e5e5;
+  --plot-muted: #aaa;
+  --plot-rule: #fff3;
+  --plot-soft: #ffffff09;
+  --plot-accent: #6ac7c9;
+}
+.embedded-explorer .explorer-kicker { font-family: var(--font-departure), monospace; font-size: 16px; margin-bottom: 1rem; }
+.embedded-explorer .explorer-note, .embedded-explorer figcaption { color: var(--plot-muted); font-size: 13px; }
+.embedded-explorer figcaption { margin-top: 1.15rem; max-width: 740px; line-height: 1.7; }
+.embedded-explorer .explorer-number { color: var(--plot-ink); font-weight: 500; }
+.embedded-explorer .explorer-source { display: inline-block; font-size: 13px; margin-top: .5rem; }
+.embedded-explorer .explorer-source-note { white-space: normal; }
+.embedded-explorer .explorer-choices { display: flex; flex-wrap: wrap; gap: .25rem 1rem; margin: .75rem 0 1.5rem; }
+.embedded-explorer button { cursor: pointer; font: inherit; color: inherit; text-align: left; touch-action: manipulation; }
+.embedded-explorer .explorer-choices button { border-bottom: 2px solid transparent; padding: .6rem 0; color: var(--plot-muted); }
+.embedded-explorer .explorer-choices button[aria-pressed="true"] { border-color: var(--plot-accent); color: var(--plot-ink); }
+.embedded-explorer button:focus-visible { outline: 2px solid var(--plot-accent); outline-offset: 4px; }
+.embedded-explorer button:hover { color: var(--plot-ink); }
+.embedded-explorer .explorer-explanation { margin-top: .9rem; max-width: 680px; min-height: 3.2em; }
+.embedded-explorer .explorer-control-label { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .35rem 1rem; }
+.embedded-explorer .explorer-control-label > span { color: var(--plot-muted); font-size: 13px; }
+.embedded-explorer .explorer-subheading { font-weight: 500; margin-bottom: .8rem; }
+.embedded-explorer .explorer-metric { margin-bottom: 1rem; }
+.embedded-explorer .explorer-metric > div:first-child { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: .4rem; font-size: 13px; }
+.embedded-explorer .explorer-metric-track { height: 12px; background: var(--plot-soft); }
+.embedded-explorer .explorer-metric-track > span { display: block; height: 100%; background: var(--metric-color); transition: width 220ms ease; }
+.embedded-explorer .explorer-metric-key:before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: .45rem; background: var(--metric-color); }
+.embedded-explorer .explorer-timeline { margin-top: .6rem; }
+.embedded-explorer .explorer-timeline-lane { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: .75rem; align-items: center; font-size: 12px; margin: .6rem 0; }
+.embedded-explorer .explorer-timeline-lane svg { width: 100%; height: 25px; overflow: visible; }
+.embedded-explorer .explorer-timeline-rule { stroke: var(--plot-rule); stroke-width: 1; }
+.embedded-explorer .explorer-timeline-axis { position: relative; height: 1.8em; margin-left: 76px; color: var(--plot-muted); font-size: 11px; border-top: 1px solid var(--plot-rule); padding-top: .4rem; }
+.embedded-explorer .explorer-timeline-axis > span { position: absolute; transform: translateX(-50%); }
+.embedded-explorer .explorer-timeline-axis > span:first-child { transform: none; }
+.embedded-explorer .explorer-timeline-axis > span:last-child { transform: translateX(-100%); }
+@media (max-width: 639px) {
+  .embedded-explorer { font-size: 14px; }
+  .embedded-explorer .explorer-kicker { font-size: 15px; }
+  .embedded-explorer .explorer-choices { gap: .2rem .9rem; }
+  .embedded-explorer .explorer-choices button { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) { .embedded-explorer .explorer-metric-track > span { transition: none; } }

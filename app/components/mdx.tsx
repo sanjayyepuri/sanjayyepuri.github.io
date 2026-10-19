@@ -6,6 +6,7 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
 import { basePath } from 'app/sitemap'
+import { ParquetLayout, PageSizeExplorer, MemoryExplorer, OutputExplorer } from './gpu-parquet/explorers'
 
 function Table({ data }) {
   let headers = data.headers.map((header, index) => (
@@ -20,12 +21,14 @@ function Table({ data }) {
   ))
 
   return (
+    <div className="table-scroll" role="region" aria-label="Experiment results" tabIndex={0}>
     <table>
       <thead>
         <tr>{headers}</tr>
       </thead>
       <tbody>{rows}</tbody>
     </table>
+    </div>
   )
 }
 
@@ -58,6 +61,24 @@ function RoundedImage(props) {
   // For static export, use regular img tag instead of Next.js Image
   // since Image optimization requires a server
   return <img alt={props.alt} className="rounded-lg" {...props} src={src} />
+}
+
+function Figure({ src, alt, number, caption, source }: {
+  src: string; alt: string; number: string; caption: string; source?: string
+}) {
+  const href = `${basePath || ''}${src}`
+  return (
+    <figure className="article-figure">
+      <a href={href} target="_blank" rel="noopener noreferrer" aria-label={`Open figure ${number} at full size`}>
+        <img src={href} alt={alt} loading="lazy" decoding="async" />
+      </a>
+      <figcaption>
+        <span className="figure-number">Figure {number}.</span> {caption}{' '}
+        <a href={href} target="_blank" rel="noopener noreferrer">Full size</a>
+        {source && <> · <a href={source} target="_blank" rel="noopener noreferrer">Experiment report</a></>}
+      </figcaption>
+    </figure>
+  )
 }
 
 function Code({ children, ...props }) {
@@ -110,6 +131,11 @@ let components = {
   a: CustomLink,
   code: Code,
   Table,
+  Figure,
+  ParquetLayout,
+  PageSizeExplorer,
+  MemoryExplorer,
+  OutputExplorer,
 }
 
 export function CustomMDX(props) {
