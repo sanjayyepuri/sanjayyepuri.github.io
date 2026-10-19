@@ -40,9 +40,11 @@ Now that we know how the parquet reader works at a high level, we can see that t
 
 > The experiments were run on an NVIDIA RTX 3090 with 24 GiB of VRAM, using a C++ reader built against libcudf 26.10 on Ubuntu 20.04 under WSL2. Compatibility I/O was enabled; GPUDirect Storage was not used. Read timings included metadata processing, allocation, file access, transfers, and GPU decoding, ending with GPU synchronization. GPU aggregation was timed separately, and every measured sum was checked against a CPU reference. The [full experiment report](https://github.com/sanjayyepuri/cudf_scratch/blob/main/experiments/REPORT.md) includes reproduction instructions and raw results. Note the repository was generated with GPT-6.1 Sol.
 
+<aside className="suggested-analysis">
 > **Suggested analysis — larger-scale rerun.** The new figures include separate 15 GiB datasets alongside the original measurements. The larger Page study uses 60 Row Groups of 256 MiB and bounded chunked reads with a fixed 2 GiB pass hint. It changes the row-group layout and read API as well as scale, so compare Page targets within each dataset rather than treating the latency difference as an isolated scaling effect.
 >
 > Each large Page layout has three measured timing rounds after a warm-up and one separately profiled round after a warm-up. The 15 GiB files exceed available host RAM; the warm-up does not establish a warm filesystem cache. File access and transfers remain part of measured reader time.
+</aside>
 
 ### Sweep on Page Sizes
 
@@ -92,11 +94,13 @@ In each run, the read launched 33 kernels; page size changed the grid and kernel
 
 This core takeaway is the same as in Luo's paper: the page size used in parquet plays a large part in the performance of GPU decoding.
 
+<aside className="suggested-analysis">
 > **Suggested analysis — Page layout at 15 GiB.** The lowest recorded median is now **6.694 s at 16 MiB Pages**, versus **9.792 s at 16 KiB**. The observed ranges for 16 MiB, 256 KiB and 1 MiB overlap, so these samples do not establish a clear winner among those larger targets. This does not establish a universal optimum.
 >
 > The new traces still show the header/decoder tradeoff: 16 KiB Pages spend **3,319.630 ms** in header kernels and **41.416 ms** in value decoding; 16 MiB Pages spend **4.101 ms** and **329.151 ms**, respectively. These are full-read totals from one separate profiled read per layout, not repeated profiled medians.
 >
 > The largest Page target now has **32 blocks per decoder launch across 30 launches**, rather than four blocks in one launch. All layouts use 30 input passes and 30 subpasses. The two smallest Page targets record **1,230 reader kernels**, and the others **1,020**; the original 33-kernel observation applies to the original whole-file experiment. No overlapping reader kernels were observed. Kernel totals cover the whole read, while the larger timeline is explicitly a first-output-batch excerpt; neither measures SM utilization.
+</aside>
 
 ### Memory Control
 
@@ -106,9 +110,11 @@ This experiment used eight row groups and three integer columns, compressed with
 
 For memory measurements, we ran three additional rounds per configuration after a warm-up. An RMM statistics adaptor tracked live allocations through the current device memory resource, including reader temporaries, output tables, and reduction allocations. The default CUDA allocator was preserved; no memory pool was added.
 
+<aside className="suggested-analysis">
 > **Suggested analysis — larger memory budgets.** The new compressed fixture contains **805,306,368 rows in 192 Row Groups**, with three flat integer columns and **15 GiB of decoded values** stored in a **5.9 GiB ZSTD file**. All three columns are decoded; only amount is reduced for the correctness check. The 1 MiB Page target and row-group size match the smaller fixture. The main pass-hint grid is **256 MiB–8 GiB**, with the output limit disabled.
 >
 > The larger fixture uses three timing rounds, one separate traced round and two separate memory rounds per configuration, each after a warm-up. The unlimited setting is omitted because the earlier peak-to-data ratio extrapolates above available GPU capacity; this is an estimate, not a measured OOM. The completed 16–1,024 MiB timing sweep is retained as a diagnostic. A 16 MiB hint is smaller than one compressed Row Group and primarily exercises pathological batching.
+</aside>
 
 <MemoryExplorer />
 
@@ -128,9 +134,11 @@ For memory measurements, we ran three additional rounds per configuration after 
 
 The 16 MiB and 64 MiB hints both required eight input passes, but the smaller hint increased subpasses from 32 to 248. It reduced peak live allocations from 94.36 MiB to 44.05 MiB while making reads about 6.4× slower. The hint therefore exposes a substantial memory–latency tradeoff, even when the input-pass count stays unchanged.
 
+<aside className="suggested-analysis">
 > **Suggested analysis — diminishing returns at larger budgets.** At 15 GiB, a **2 GiB hint reads in 3.690 s with 2,044.34 MiB peak live allocations**; **8 GiB takes 3.348 s at 8,189.96 MiB**. Roughly **9.3% less reader time requires four times the peak allocation**. The fastest measured setting need not be the best use of memory for a larger query.
 >
 > Across the full grid, 256 MiB uses **96 input passes and 288 subpasses**, versus **3 input passes and 8 subpasses** at 8 GiB. Both boundaries change, so these timings do not isolate subpass overhead alone. Tables are reduced and released incrementally; retaining the full 15 GiB output or running additional operators changes the capacity requirement.
+</aside>
 
 Peak live RMM allocations count requests through the tracked allocator, including temporaries and output tables. They do not measure process-exclusive physical VRAM residency under WSL. These measurements also assume each returned table is released before the next is retained.
 
