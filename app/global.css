@@ -214,7 +214,7 @@ body:has(.technical-post) .flex-1 { min-width: 0; }
 .technical-post > h1 { max-width: 780px; letter-spacing: -2px; line-height: 1.12; }
 .technical-post .prose { font-family: var(--font-geist-sans), system-ui, sans-serif; line-height: 1.75; font-size: 17px; }
 .technical-post .prose > :is(p, ul, ol, blockquote, h2, h3, details) { max-width: 680px; }
-.technical-post .prose h2 { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #8885; font-size: 25px; line-height: 1.4; }
+.technical-post .prose h2 { margin-top: 3rem; padding-top: 1rem; font-size: 25px; line-height: 1.4; }
 .technical-post .prose h3 { margin-top: 2.5rem; font-size: 21px; }
 .technical-post .prose li { margin: .6rem 0; }
 .technical-post .prose blockquote { border-left: 2px solid #8888; padding: .1rem 1.25rem; margin: 1.5rem 0; font-size: .9em; }
@@ -232,7 +232,7 @@ body:has(.technical-post) .flex-1 { min-width: 0; }
 .article-figure figcaption { max-width: 760px; margin-top: .85rem; color: #525252; font-size: 13px; line-height: 1.65; }
 .dark .article-figure figcaption { color: #b5b5b5; }
 .figure-number { font-weight: 600; }
-.technical-post .prose details { max-width: 100%; border-top: 1px solid #8885; border-bottom: 1px solid #8885; margin-top: 2rem; padding: 1rem 0; }
+.technical-post .prose details { max-width: 100%; margin-top: 2rem; padding: 1rem 0; }
 .technical-post summary { cursor: pointer; font-size: 15px; font-weight: 500; }
 @media (max-width: 639px) {
   .technical-post .prose { font-size: 16px; }
