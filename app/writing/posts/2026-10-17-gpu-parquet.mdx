@@ -1,13 +1,14 @@
 ---
 title: Reading Parquet with cuDF
 publishedAt: 2026-10-17
+updatedAt: 2026-10-19
 author: Sanjay Yepuri
 type: post
 summary: How Parquet page layout and cuDF reader hints trade GPU parallelism, memory, and latency.
 ---
 At Chalk, I’ve been building a distributed query engine whose executor can target both CPUs and GPUs. For an early GPU demo, we compiled queries into cuDF operations and loaded their inputs from Parquet files. This made me wonder: how does cuDF read Parquet, and what controls does it provide for managing GPU memory? After all, the name of the game is keeping the working set as close to compute as possible.
 
-I found a [paper](https://arxiv.org/html/2602.17335v1) discussing exactly my questions. I spent a morning diving deeper and getting my hands dirty.
+I found a [paper](https://arxiv.org/html/2602.17335v1) discussing exactly my questions. I spent a morning diving deeper and getting my hands dirty. I later reran the experiments at 15 GiB of decoded data; the interactive figures retain the original smaller runs for comparison.
 
 ## A Brief Tour of Parquet
 
@@ -42,16 +43,20 @@ Now that we know how the parquet reader works at a high level, we can see that t
 
 ### Sweep on Page Sizes
 
-The first experiment was inspired by the paper; we generated a parquet file with the same amount of table data.  The parquet was laid out with 4 Row Groups, each with a single Column Chunk. Each Column Chunk had a different number of Pages based on the selected Page size.
+The larger Page experiment writes the same 15 GiB of non-null INT64 values into each of five files. Each has 60 Row Groups of 256 MiB, one Column Chunk per group, uncompressed PLAIN encoding, and no dictionary or statistics. Only the Page target changes. The chunked reader uses a fixed 2 GiB pass hint and releases each returned table after computing its sum.
+
+This differs from the original 64 MiB whole-file experiment with four Row Groups. Encoded input, decoded output, and temporary buffers can exceed GPU capacity at the larger scale, so the read API and row-group layout also change. Compare Page sizes within each dataset; the figures preserve the original measurements as a separate selection.
+
+Each Page layout has three unprofiled measured reads after an excluded warm-up, plus one separate profiled read after a warm-up. A 15 GiB file exceeds available host RAM, so the warm-up does not establish a warm filesystem cache. End-to-end timing includes file access and transfers.
 
 <details className="measurement-details">
 <summary>Exact page-size measurements</summary>
 
-<Table data={{"headers": ["Page target", "Actual total pages", "Median read", "Observed min–max"], "rows": [["16 KiB", "4,096", "24.681 ms", "23.988–27.926 ms"], ["64 KiB", "1,024", "18.541 ms", "17.627–20.346 ms"], ["256 KiB", "256", "17.231 ms", "15.995–19.096 ms"], ["1 MiB", "64", "17.412 ms", "16.098–19.383 ms"], ["16 MiB", "4", "26.378 ms", "25.264–27.823 ms"]]}} />
+<Table data={{"headers": ["Page target", "Actual total pages", "Median read", "Observed min–max"], "rows": [["16 KiB", "983,040", "9.792 s", "9.757–9.824 s"], ["64 KiB", "245,760", "7.258 s", "7.241–7.292 s"], ["256 KiB", "61,440", "6.746 s", "6.735–6.855 s"], ["1 MiB", "15,360", "6.883 s", "6.693–6.944 s"], ["16 MiB", "960", "6.694 s", "6.660–6.769 s"]]}} />
 
 </details>
 
-We can see that our results empirically agree with Luo's insight that each Column Chunk should have more pages (around 100). In my experiments, we saw that between 16 and 64 pages per Column Chunk provided the best performance. The paper mentions there is no one value that is _optimal_.
+In this larger sweep, **16 MiB Pages** had the lowest median read time: **6.694 s**, with **16 Pages per Column Chunk**. The observed ranges for 16 MiB, 256 KiB, and 1 MiB overlap, so these samples do not establish a clear winner among those targets. This is a measured result for one layout and read configuration, not a universal optimum. File access, transfer, and batching are included, so the kernel trace helps distinguish GPU work from the overall read. The original small-scale results remain available in the figure.
 
 At this point, I was wondering where time was being spent in the reader. Why did having more pages seem to substantially increase the runtime?
 
@@ -62,38 +67,46 @@ Select a Page size below to compare the header and value-decoding costs, then fo
 <details className="measurement-details">
 <summary>Exact profiled kernel measurements</summary>
 
-<Table data={{"headers": ["Page target", "Data-decoder grid", "Header kernels", "Value decoder", "Kernel busy time", "Memcpy busy time"], "rows": [["16 KiB", "4,096 blocks", "7.119 ms", "0.189 ms", "7.513 ms", "5.807 ms"], ["64 KiB", "1,024 blocks", "1.721 ms", "0.178 ms", "2.017 ms", "5.461 ms"], ["256 KiB", "256 blocks", "0.419 ms", "0.202 ms", "0.716 ms", "5.504 ms"], ["1 MiB", "64 blocks", "0.113 ms", "0.611 ms", "0.800 ms", "5.495 ms"], ["16 MiB", "4 blocks", "0.012 ms", "9.775 ms", "9.862 ms", "5.519 ms"]]}} />
+<Table data={{"headers": ["Page target", "Blocks per decoder launch", "Header kernels", "Value decoder", "Kernel busy time", "Memcpy busy time"], "rows": [["16 KiB", "32768", "3319.630 ms", "41.416 ms", "3417.935 ms", "1328.580 ms"], ["64 KiB", "8192", "827.632 ms", "40.970 ms", "884.723 ms", "1262.836 ms"], ["256 KiB", "2048", "244.385 ms", "47.402 ms", "298.258 ms", "1248.128 ms"], ["1 MiB", "512", "72.530 ms", "78.121 ms", "155.591 ms", "1244.544 ms"], ["16 MiB", "32", "4.101 ms", "329.151 ms", "336.297 ms", "1241.788 ms"]]}} />
 
 </details>
 
-My initial guess was that there was more overhead on the decode side since each page couldn't be scheduled in the same sub-pass. This was wrong, however. We can see that when the Page size was small, more time was spent in the header kernels. This aligns with our understanding that these kernels are parallelized by Column Chunk, but scan the Page headers serially; more headers mean the runtime contribution grows with the number of pages.
+The new traces separate Page-header work from value decoding. At **16 KiB**, header kernels took **3319.630 ms** and value decoding took **41.416 ms**. At **16 MiB**, those totals were **4.101 ms** and **329.151 ms**. These are totals from one separately profiled read per layout, not medians over repeated traces.
 
-In a similar manner, if the Page size is large, we lose parallelism opportunities on the decode side. That's why the 16 MiB page took longer. There were only 4 launched blocks decoding larger Pages of data.
+Header kernels walk Pages within Column Chunks; value-decoding kernels expose Page-level blocks. At the largest Page size, this larger fixture launched **32 blocks per decoder launch**, across **30 decoder launches**. The original 64 MiB case had only four decoding blocks in one launch. The changed Row Group layout and chunked read path matter, so the original four-block explanation cannot simply be copied to the new dataset.
 
-In each run, the read launched 33 kernels; page size changed the grid and kernel runtime, not the number of launches.
-
-This core takeaway is the same as in Luo's paper: the page size used in parquet plays a large part in the performance of GPU decoding.
+The new reads recorded **1020, 1230 reader kernels**, depending on layout. These counts exclude reduction kernels. The former “33 kernels per read” observation applies only to the original whole-file experiment. Layout affects both work inside kernels and how the chunked reader batches that work. The timelines show recorded activity, not SM utilization, and gaps are not proof that the GPU is entirely idle.
 
 ### Memory Control
 
 In the first experiment, I noticed that my parquet file was being decoded in a single pass and sub-pass. I wanted to see how the number of passes and sub-passes impacted performance. I understood that the additional overhead would increase the runtime, but I wanted to verify that the buffer memory used for reading the parquet was controlled.
 
-This experiment used eight row groups and three integer columns, compressed with ZSTD and written with a 1 MiB page target. The file occupied 251.6 MiB on disk and contained 640 MiB of numeric output. I varied `pass_read_limit` with the output limit disabled, consuming and releasing each returned table individually.
+The larger memory experiment uses 805,306,368 rows in 192 Row Groups and three flat integer columns: INT64 amount, INT64 customer ID, and INT32 quantity. The same distributions and 4,194,304-row group size as the original experiment now produce **15 GiB of numeric values**, stored in a **5.9 GiB ZSTD file** with a 1 MiB Page target. All three columns are decoded; only amount is reduced for the correctness check. I vary `pass_read_limit` from 256 MiB to 8 GiB with the output limit disabled, consuming and releasing each returned table individually.
 
-For memory measurements, we ran three additional rounds per configuration after a warm-up. An RMM statistics adaptor tracked live allocations through the current device memory resource, including reader temporaries, output tables, and reduction allocations. The default CUDA allocator was preserved; no memory pool was added.
+The unlimited case is omitted at this scale. The original 640 MiB experiment peaked at roughly 2.9 times its decoded value size; extrapolating that ratio would exceed available GPU memory. This is a capacity estimate, not a measured out-of-memory result.
+
+There are three baseline timing rounds per configuration after an excluded warm-up, one separate traced round after a warm-up, and two separate memory rounds after a warm-up. An RMM statistics adaptor tracked live allocations through the current device memory resource, including reader temporaries, output tables, and reduction allocations. The default CUDA allocator was preserved; no memory pool was added.
 
 <MemoryExplorer />
 
 <details className="measurement-details">
 <summary>Exact pass-hint measurements</summary>
 
-<Table data={{"headers": ["Pass hint", "Input passes / subpasses", "Peak live RMM allocations", "Baseline median read"], "rows": [["Unlimited", "1 / 1", "1,861.60 MiB", "153.10 ms"], ["16 MiB", "8 / 248", "44.05 MiB", "6,423.41 ms"], ["64 MiB", "8 / 32", "94.36 MiB", "998.97 ms"], ["256 MiB", "4 / 12", "259.16 MiB", "462.27 ms"], ["512 MiB", "2 / 6", "510.77 MiB", "295.13 ms"]]}} />
+<Table data={{"headers": ["Pass hint", "Input passes / subpasses", "Peak live RMM allocations", "Baseline median read"], "rows": [["256 MiB", "96 / 288", "259.17 MiB", "10.364 s"], ["512 MiB", "48 / 144", "510.78 MiB", "6.646 s"], ["1,024 MiB", "22 / 64", "1,020.29 MiB", "4.553 s"], ["2,048 MiB", "11 / 31", "2,044.34 MiB", "3.690 s"], ["4,096 MiB", "5 / 15", "4,096.17 MiB", "3.437 s"], ["8,192 MiB", "3 / 8", "8,189.96 MiB", "3.348 s"]]}} />
 
 </details>
 
-The 16 MiB and 64 MiB hints both required eight input passes, but the smaller hint increased subpasses from 32 to 248. It reduced peak live allocations from 94.36 MiB to 44.05 MiB while making reads about 6.4× slower. The hint therefore exposes a substantial memory–latency tradeoff, even when the input-pass count stays unchanged.
+The 256 MiB hint used **96 input passes and 288 subpasses**; the 8,192 MiB hint used **3 input passes and 8 subpasses**. The smaller hint reduced peak live allocations from **8,189.96 MiB to 259.17 MiB**, while taking **3.1×** as long to read the file. The fastest measured configuration was **8,192 MiB**, at **3.348 s** and **8,189.96 MiB** of peak live allocations.
+
+A practical comparison is 2 GiB versus 8 GiB: reader time falls from **3.690 s to 3.348 s** (about **9.3%**), while peak tracked allocations grow from **2.00 GiB to 8.00 GiB**. Most of the speedup is already present at the more moderate budget on this fixture; the fastest measured setting need not be the best use of memory for a larger query.
+
+The primary 256 MiB–8 GiB grid targets practical working-set sizes. A separate completed 16–1,024 MiB timing sweep is retained as a diagnostic: 16 MiB is smaller than one compressed Row Group, so it is primarily a batching stress case, not a recommended setting. Its interrupted trace and unmeasured memory peaks are not used here. Changes across the primary grid can affect both input-pass and subpass counts; timing differences cannot be attributed solely to subpass count.
+
+The 15 GiB dataset is processed incrementally; it is not retained as one 15 GiB GPU output table. This is why a much smaller live working set can suffice for this sum. A query that retains the entire output or uses additional operators has different capacity requirements.
 
 Peak live RMM allocations count requests through the tracked allocator, including temporaries and output tables. They do not measure process-exclusive physical VRAM residency under WSL. These measurements also assume each returned table is released before the next is retained.
+
+The refresh includes **18 unprofiled timing reads, six profiled reads, and twelve memory-instrumented reads** for the compressed fixture, plus **15 unprofiled and five profiled reads** for the Page sweep. Every measured read passed the CPU-reference sum, row-count, and selected-column checks. The memory runs also ended with zero tracked live bytes. The [large-scale methodology and reproduction commands](https://github.com/sanjayyepuri/cudf_scratch/blob/e401f781491dd2d18713f3df29c29b9073414c36/experiments/LARGE_SCALE.md) record the changed layouts, cache caveats, and omitted unlimited configuration.
 
 ## Closing Out
 

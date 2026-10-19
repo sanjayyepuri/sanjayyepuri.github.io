@@ -5,7 +5,7 @@ import { Explorer, ExplorerCaption, ExplorerChoices, ExplorerExplanation, Explor
 import measurements from './measurements.json'
 import './explorers.css'
 
-const source = 'https://github.com/sanjayyepuri/cudf_scratch/blob/824b8578d81ac26e8f4b63d01a6fec94ffb9d86d/experiments/'
+const source = 'https://github.com/sanjayyepuri/cudf_scratch/blob/e401f781491dd2d18713f3df29c29b9073414c36/experiments/'
 const fmt = (n: number, digits = 2) => n.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits })
 const hint = (n: number) => n === 0 ? 'Unlimited' : `${n} MiB`
 const width = (n: number): CSSProperties => ({ width: `${n}%` })
@@ -39,64 +39,62 @@ export function ParquetLayout() {
 }
 
 export function PageSizeExplorer() {
+  const [scale, setScale] = useState<'large' | 'original'>('large')
   const [selected, setSelected] = useState(2)
-  const p = measurements.pages[selected]
-  const explanations = [
-    'Small Pages expose plenty of decoder blocks, but each Column Chunk has 1,024 Page headers to walk. Header processing dominates the measured kernel time.',
-    'With 256 Pages per Column Chunk, header processing is shorter than at 16 KiB. The decoder still has 1,024 data Pages to work on.',
-    'With 64 Pages per Column Chunk, header work is short and the decoder still launches 256 blocks. This layout has the lowest median read time in the sweep.',
-    'With 16 Pages per Column Chunk, headers are cheaper again, while value decoding takes longer. End-to-end read time remains close to the 256 KiB layout.',
-    'Only one Page remains per Column Chunk. The value decoder launches just four blocks, and decoding those large Pages dominates the measured kernel time.',
-  ]
+  const pages = scale === 'large' ? measurements.largePages : measurements.pages
+  const p = pages[selected]
+  const readMax = scale === 'large' ? Math.ceil(Math.max(...pages.map(r => r.high)) / 1000) * 1000 : 32
+  const kernelMax = Math.max(...pages.flatMap(r => [r.header, r.decoder])) * 1.1
+  const traceMax = p.traceEnd
+  const ticks = Array.from({ length: 5 }, (_, i) => traceMax * i / 4)
   return <Explorer className="gpu-parquet-explorer" label="Interactive page-size experiment" title="Page Size Results">
-    <div className="explorer-note">Select a measured layout. The timings and trace below follow your selection.</div>
+    <ExplorerChoices<'large' | 'original'> label="Dataset scale" options={[{ value: 'large', label: '15 GiB · new run' }, { value: 'original', label: '64 MiB · original' }]} value={scale} onChange={v => { setScale(v); setSelected(2) }} />
+    <div className="explorer-note">{scale === 'large' ? '60 Row Groups; chunked reads with a fixed 2 GiB pass hint. File-cache residency is not guaranteed.' : 'Four Row Groups; original whole-file reads with a warm filesystem cache.'} Timing and tracing are separate runs.</div>
     <div className="read-chart" role="group" aria-label="Page target">
       <div className="read-chart-heading"><span>Page target</span><span>Unprofiled read · ms</span></div>
-      {measurements.pages.map((row, i) => <button className="read-chart-row" type="button" key={row.label} aria-pressed={i === selected} onClick={() => setSelected(i)} aria-label={`${row.label}: median read ${fmt(row.read)} milliseconds`}>
-        <span>{row.label}</span><span className="read-bar-space"><span className="read-bar" style={width(row.read / 32 * 100)} /><span className="read-range" style={{ left: `${row.low / 32 * 100}%`, width: `${(row.high - row.low) / 32 * 100}%` }} /></span><span className="read-value">{fmt(row.read)} <small>ms</small></span>
+      {pages.map((row, i) => <button className="read-chart-row" type="button" key={row.label} aria-pressed={i === selected} onClick={() => setSelected(i)} aria-label={`${row.label}: median read ${fmt(row.read)} milliseconds`}>
+        <span>{row.label}</span><span className="read-bar-space"><span className="read-bar" style={width(row.read / readMax * 100)} /><span className="read-range" style={{ left: `${row.low / readMax * 100}%`, width: `${(row.high - row.low) / readMax * 100}%` }} /></span><span className="read-value">{fmt(row.read)} <small>ms</small></span>
       </button>)}
-      <div className="read-chart-axis"><span>0</span><span>16</span><span>32 ms</span></div>
+      <div className="read-chart-axis"><span>0</span><span>{fmt(readMax / 2, 0)}</span><span>{fmt(readMax, 0)} ms</span></div>
     </div>
     <div className="page-comparison">
       <div>
         <div className="explorer-subheading">Kernel Runtime</div>
-        <ExplorerMetric label="Page headers" value={p.header} max={10} displayValue={`${fmt(p.header, 3)} ms`} color="var(--plot-header)" />
-        <ExplorerMetric label="Value decoding" value={p.decoder} max={10} displayValue={`${fmt(p.decoder, 3)} ms`} color="var(--plot-decoder)" />
-        <div className="explorer-note">Both bars share a 0–10 ms scale. Separate profiled medians.</div>
+        <ExplorerMetric label="Page headers" value={p.header} max={kernelMax} displayValue={`${fmt(p.header, 3)} ms`} color="var(--plot-header)" />
+        <ExplorerMetric label="Value decoding" value={p.decoder} max={kernelMax} displayValue={`${fmt(p.decoder, 3)} ms`} color="var(--plot-decoder)" />
+        <div className="explorer-note">Shared 0–{fmt(kernelMax, 0)} ms scale. {scale === 'large' ? 'Totals from one separate profiled read.' : 'Separate profiled medians.'}</div>
       </div>
-      <div className="page-units" aria-live="polite"><div><strong>{p.perChunk.toLocaleString('en-US')}</strong><span>Pages / Column Chunk</span></div><div><strong>{p.pages.toLocaleString('en-US')}</strong><span>data-decoder blocks</span></div></div>
+      <div className="page-units" aria-live="polite"><div><strong>{p.perChunk.toLocaleString('en-US')}</strong><span>Pages / Column Chunk</span></div><div><strong>{p.grids}</strong><span>blocks per decoder launch</span></div></div>
     </div>
-    <ExplorerExplanation>{explanations[selected]}</ExplorerExplanation>
-    <div className="trace-heading"><span className="explorer-subheading">Kernel Launch Timeline</span><span className="explorer-note">{p.label} · first measured profiled iteration</span></div>
-    <ExplorerTimeline
-      label={`${p.label} recorded CUDA timeline, from 0 to 32 milliseconds. Separate kernel and memory-copy lanes.`}
-      max={32}
-      lanes={['kernel', 'memcpy'].map(kind => ({
-        label: kind === 'kernel' ? 'Kernels' : 'Copies',
-        color: kind === 'kernel' ? 'var(--plot-decoder)' : 'var(--plot-copy)',
-        events: p.events.filter(e => e[0] === kind).map(e => ({ start: Number(e[1]), duration: Number(e[2]) })),
-      }))}
-      ticks={[0, 8, 16, 24, 32].map(value => ({ value, label: value === 32 ? '32 ms' : value }))}
-    />
-    <ExplorerCaption number={3}>The same 8,388,608 INT64 values, four Row Groups, warm cache. Read bars show unprofiled medians; whiskers show observed min–max. Traces are separate profiled reads, not SM utilization. Subpixel events are widened for visibility. All layouts launched 33 kernels. <span className="explorer-source-note">No interpolated benchmark results.</span></ExplorerCaption>
-    <a className="explorer-source" href={source + 'results-pages-traced/report.md'} target="_blank" rel="noopener noreferrer">Measurements and trace methodology ↗</a>
+    <ExplorerExplanation>{p.label} produces {p.pages.toLocaleString('en-US')} data Pages across the file. The trace recorded {p.decoderLaunches} value-decoder launches and {p.kernelCount} reader kernels. More Pages change the work within each launch; the launch count also reflects batching. {p.read === Math.min(...pages.map(r => r.read)) ? 'This configuration had the lowest median read time in this sweep.' : ''}</ExplorerExplanation>
+    <div className="trace-heading"><span className="explorer-subheading">Kernel Launch Timeline</span><span className="explorer-note">{p.label} · {scale === 'large' ? 'first output batch from the profiled read' : 'first measured profiled iteration'}</span></div>
+    <ExplorerTimeline label={`${p.label} recorded CUDA timeline. Separate kernel and memory-copy lanes.`} max={traceMax}
+      lanes={['kernel', 'memcpy'].map(kind => ({ label: kind === 'kernel' ? 'Kernels' : 'Copies', color: kind === 'kernel' ? 'var(--plot-decoder)' : 'var(--plot-copy)', events: p.events.filter(e => e[0] === kind).map(e => ({ start: Number(e[1]), duration: Number(e[2]) })) }))}
+      ticks={ticks.map(value => ({ value, label: `${fmt(value, 0)} ms` }))} />
+    <ExplorerCaption number={3}>Read bars show unprofiled medians; whiskers show observed min–max. Traces are separate profiled reads, not SM utilization. For 15 GiB, kernel totals cover the full read while the timeline shows only its first output batch. Subpixel events are widened for visibility. The larger experiment changes row-group layout and read API as well as scale; compare Page sizes within a dataset, not absolute latency across the two datasets.</ExplorerCaption>
+    <a className="explorer-source" href={source + (scale === 'large' ? 'results-large-pages-15gib/report.md' : 'results-pages-traced/report.md')} target="_blank" rel="noopener noreferrer">Measurements and trace methodology ↗</a>
   </Explorer>
 }
 
 export function MemoryExplorer() {
-  const runs = measurements.runs.filter(r => r.outputHint === 0)
+  const [scale, setScale] = useState<'large' | 'original'>('large')
+  const runs = (scale === 'large' ? measurements.largeRuns : measurements.runs).filter(r => r.outputHint === 0)
   const [selected, setSelected] = useState(2)
   const run = runs[selected]
+  const memoryMax = Math.ceil(Math.max(...runs.map(r => r.memory)) / 100) * 100
+  const timeMax = Math.ceil(Math.max(...runs.map(r => r.read)) / 1000) * 1000
+  const fastest = runs.reduce((a, b) => a.read < b.read ? a : b)
   return <Explorer className="gpu-parquet-explorer" label="Interactive pass-memory experiment" title="Memory-Runtime Tradeoff">
+    <ExplorerChoices<'large' | 'original'> label="Dataset scale" options={[{ value: 'large', label: '15 GiB · new run' }, { value: 'original', label: '640 MiB · original' }]} value={scale} onChange={v => { setScale(v); setSelected(2) }} />
     <div className="explorer-control-label">Pass-memory hint <span>output limit disabled</span></div>
     <ExplorerChoices<number> label="Pass-memory hint" options={runs.map((r, value) => ({ label: hint(r.passHint), value }))} value={selected} onChange={setSelected} />
     <div className="memory-comparison" role="group" aria-label="Measured memory and latency comparison">
-      <div className="memory-head"><span>Pass hint</span><span>Peak live RMM<span>0–2,000 MiB</span></span><span>Baseline read<span>0–7,000 ms</span></span></div>
-      {runs.map((r, i) => <div className={`memory-row ${selected === i ? 'is-current' : ''}`} key={r.passHint}><span>{hint(r.passHint)}</span><div><span className="memory-meter"><span style={width(r.memory / 2000 * 100)} /></span><span>{fmt(r.memory)} <small>MiB</small></span></div><div><span className="latency-meter"><span style={width(r.read / 7000 * 100)} /></span><span>{fmt(r.read)} <small>ms</small></span></div></div>)}
+      <div className="memory-head"><span>Pass hint</span><span>Peak live RMM<span>0–{fmt(memoryMax, 0)} MiB</span></span><span>Baseline read<span>0–{fmt(timeMax, 0)} ms</span></span></div>
+      {runs.map((r, i) => <div className={`memory-row ${selected === i ? 'is-current' : ''}`} key={r.passHint}><span>{hint(r.passHint)}</span><div><span className="memory-meter"><span style={width(r.memory / memoryMax * 100)} /></span><span>{fmt(r.memory)} <small>MiB</small></span></div><div><span className="latency-meter"><span style={width(r.read / timeMax * 100)} /></span><span>{fmt(r.read)} <small>ms</small></span></div></div>)}
     </div>
-    <div className="batch-counts" aria-live="polite"><div><strong>{run.passes}</strong><span>input passes</span></div><span aria-hidden="true">→</span><div><strong>{run.subpasses}</strong><span>subpasses</span></div><span aria-hidden="true">→</span><div><strong>{run.outputs}</strong><span>output tables</span></div></div>
-    <ExplorerExplanation>{run.passHint === 0 ? <>With the hint disabled, the reader uses one input pass and one subpass. It is fastest here, but peak tracked allocations reach {fmt(run.memory)} MiB.</> : <>At a {hint(run.passHint)} hint, peak live allocations are <strong>{fmt(run.memory)} MiB</strong> and reads take <strong>{fmt(run.read / runs[0].read, 1)}×</strong> as long as the unlimited baseline.{run.passHint === 16 || run.passHint === 64 ? ' The 16 and 64 MiB settings both use eight input passes; their subpass counts differ sharply.' : ''}</>}</ExplorerExplanation>
-    <ExplorerCaption number={4} source={{ href: source + "results-subpasses/memory-report.md", label: "Data & method" }}>Measured configurations, on shared linear scales. Memory was measured separately from timing. Each returned table is consumed and released; the hint is not a cap on total memory.</ExplorerCaption>
+    <div className="batch-counts" aria-live="polite"><div><strong>{run.passes.toLocaleString('en-US')}</strong><span>input passes</span></div><span aria-hidden="true">→</span><div><strong>{run.subpasses.toLocaleString('en-US')}</strong><span>subpasses</span></div><span aria-hidden="true">→</span><div><strong>{run.outputs.toLocaleString('en-US')}</strong><span>output tables</span></div></div>
+    <ExplorerExplanation>At a {hint(run.passHint).toLowerCase()} hint, peak live allocations are <strong>{fmt(run.memory)} MiB</strong> and reads take <strong>{fmt(run.read / fastest.read, 1)}×</strong> as long as the fastest measured setting ({hint(fastest.passHint).toLowerCase()}). {scale === 'large' ? 'The main grid is 256 MiB–8 GiB. The unlimited configuration was omitted because the earlier peak-to-data ratio would exceed available GPU memory; that is an estimate, not a measured OOM.' : 'The original smaller dataset fits with unlimited hints.'}</ExplorerExplanation>
+    <ExplorerCaption number={4} source={{ href: source + (scale === 'large' ? 'results-large-15gib/memory-report.md' : 'results-subpasses/memory-report.md'), label: 'Data & method' }}>Measured configurations, on shared linear scales within each dataset. Memory was measured separately from timing. Each returned table is consumed and released; the hint is not a cap on total memory.</ExplorerCaption>
   </Explorer>
 }
 

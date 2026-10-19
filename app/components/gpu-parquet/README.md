@@ -27,3 +27,21 @@ The trace is not a measure of SM utilization, and it is separate from the median
 kernel measurements. Pass hints remain soft targets, not GPU capacity guarantees.
 
 Shared figure frames, controls, captions, metric bars, and timeline rendering come from `../explorer`. See that library’s README for reuse and theming. This directory owns the Parquet data, explanations, and specialized layouts.
+
+## 15 GiB refresh (October 19)
+
+The default selections now use results from `cudf_scratch` commit
+`e401f781491dd2d18713f3df29c29b9073414c36`. The original smaller datasets remain separately selectable.
+
+- `experiments/results-large-pages-15gib/summary.csv`: three unprofiled rounds per Page layout.
+- `experiments/results-large-pages-15gib/trace-summary.csv`: full-reader GPU totals from one separate profiled round.
+- `experiments/results-large-pages-15gib/timeline-*.csv`: exact first-output-batch excerpts, explicitly labelled separately from full-read totals.
+- `experiments/results-large-15gib/summary.csv`: timing medians and observed pass/subpass/output counts.
+- `experiments/results-large-15gib/memory-summary.csv`: two separate memory rounds per configuration, with byte-to-MiB conversion.
+
+`experiments/export_blog.py` joins the CSVs into `largePages` and `largeRuns` without
+rounding. The primary memory grid is 256 MiB–8 GiB; the earlier tiny-hint timing
+sweep is a diagnostic, with no claimed memory measurements. Bar and timeline
+scales derive from the selected measured dataset. The 15 GiB Page experiment
+changes the API, row-group layout, and cache conditions along with scale, so it
+is not an isolated scaling comparison against the original whole-file read.
