@@ -48,7 +48,7 @@ export function PageSizeExplorer() {
   const traceMax = p.traceEnd
   const ticks = Array.from({ length: 5 }, (_, i) => traceMax * i / 4)
   return <Explorer className="gpu-parquet-explorer" label="Interactive page-size experiment" title="Page Size Results">
-    <ExplorerChoices<'large' | 'original'> label="Dataset scale" options={[{ value: 'original', label: '64 MiB · original' }, { value: 'large', label: '15 GiB · new run' }]} value={scale} onChange={v => { setScale(v); setSelected(2) }} />
+    <ExplorerChoices<'large' | 'original'> label="Dataset scale" options={[{ value: 'original', label: '64 MiB File' }, { value: 'large', label: '15 GiB File' }]} value={scale} onChange={v => { setScale(v); setSelected(2) }} />
     <div className="explorer-note">{scale === 'large' ? '60 Row Groups; chunked reads with a fixed 2 GiB pass hint. File-cache residency is not guaranteed.' : 'Four Row Groups; original whole-file reads with a warm filesystem cache.'} Timing and tracing are separate runs.</div>
     <div className="read-chart" role="group" aria-label="Page target">
       <div className="read-chart-heading"><span>Page target</span><span>Unprofiled read · ms</span></div>
@@ -79,13 +79,14 @@ export function PageSizeExplorer() {
 export function MemoryExplorer() {
   const [scale, setScale] = useState<'large' | 'original'>('original')
   const runs = (scale === 'large' ? measurements.largeRuns : measurements.runs).filter(r => r.outputHint === 0)
-  const [selected, setSelected] = useState(2)
+    .sort((a, b) => Number(a.passHint === 0) - Number(b.passHint === 0))
+  const [selected, setSelected] = useState(1)
   const run = runs[selected]
   const memoryMax = Math.ceil(Math.max(...runs.map(r => r.memory)) / 100) * 100
   const timeMax = Math.ceil(Math.max(...runs.map(r => r.read)) / 1000) * 1000
   const fastest = runs.reduce((a, b) => a.read < b.read ? a : b)
   return <Explorer className="gpu-parquet-explorer" label="Interactive pass-memory experiment" title="Memory-Runtime Tradeoff">
-    <ExplorerChoices<'large' | 'original'> label="Dataset scale" options={[{ value: 'original', label: '640 MiB · original' }, { value: 'large', label: '15 GiB · new run' }]} value={scale} onChange={v => { setScale(v); setSelected(2) }} />
+    <ExplorerChoices<'large' | 'original'> label="Dataset scale" options={[{ value: 'original', label: '640 MiB File' }, { value: 'large', label: '15 GiB File' }]} value={scale} onChange={v => { setScale(v); setSelected(v === 'original' ? 1 : 2) }} />
     <div className="explorer-control-label">Pass-memory hint <span>output limit disabled</span></div>
     <ExplorerChoices<number> label="Pass-memory hint" options={runs.map((r, value) => ({ label: hint(r.passHint), value }))} value={selected} onChange={setSelected} />
     <div className="memory-comparison" role="group" aria-label="Measured memory and latency comparison">
