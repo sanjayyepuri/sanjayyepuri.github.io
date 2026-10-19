@@ -1,46 +1,5 @@
-.embedded-explorer {
-  --plot-ink: #252525;
-  --plot-muted: #303030;
-  --plot-rule: #2223;
-  --plot-soft: #2222220a;
-  --plot-accent: #00515d;
-  --plot-header: #704500;
-  --plot-decoder: #604095;
-  --plot-copy: #00515d;
-  color: var(--plot-ink);
-  margin: 1.5rem 0;
-  padding: .5rem 0;
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
-  font-size: 15px;
-  line-height: 1.55;
-  font-variant-numeric: tabular-nums;
-}
-.dark .embedded-explorer {
-  --plot-ink: #e5e5e5;
-  --plot-muted: #aaa;
-  --plot-rule: #fff3;
-  --plot-soft: #ffffff09;
-  --plot-accent: #6ac7c9;
-  --plot-header: #d7b36b;
-  --plot-decoder: #b3a0df;
-  --plot-copy: #6ac7c9;
-}
-.embedded-explorer .explorer-kicker { font-family: var(--font-departure), monospace; font-size: 16px; margin-bottom: 1rem; }
-.embedded-explorer .explorer-note, .embedded-explorer figcaption { color: var(--plot-muted); font-size: 13px; }
-.embedded-explorer figcaption { margin-top: 1.15rem; max-width: 740px; line-height: 1.7; }
-.embedded-explorer .explorer-number { color: var(--plot-ink); font-weight: 500; }
-.embedded-explorer .explorer-source { display: inline-block; font-size: 13px; margin-top: .5rem; }
-.embedded-explorer .explorer-source-note { white-space: normal; }
-.explorer-choices { display: flex; flex-wrap: wrap; gap: .25rem 1rem; margin: .75rem 0 1.5rem; }
-.embedded-explorer button { cursor: pointer; font: inherit; color: inherit; text-align: left; touch-action: manipulation; }
-.explorer-choices button { border-bottom: 2px solid transparent; padding: .6rem 0; color: var(--plot-muted); }
-.explorer-choices button[aria-pressed="true"] { border-color: var(--plot-accent); color: var(--plot-ink); }
-.embedded-explorer button:focus-visible { outline: 2px solid var(--plot-accent); outline-offset: 4px; }
-.embedded-explorer button:hover { color: var(--plot-ink); }
-.embedded-explorer .explorer-explanation { margin-top: .9rem; max-width: 680px; min-height: 3.2em; }
-.explorer-control-label { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .35rem 1rem; }
-.explorer-control-label > span { color: var(--plot-muted); font-size: 13px; }
-.explorer-subheading { font-weight: 500; margin-bottom: .8rem; }
+.gpu-parquet-explorer { --plot-header: #704500; --plot-decoder: #604095; --plot-copy: #00515d; }
+.dark .gpu-parquet-explorer { --plot-header: #d7b36b; --plot-decoder: #b3a0df; --plot-copy: #6ac7c9; }
 .layout-explorer { max-width: 680px; }
 .parquet-group { display: grid; grid-template-columns: 125px 1fr; padding: .8rem 0; gap: 1rem; border-bottom: 1px solid var(--plot-rule); }
 .row-group-label { align-self: center; }
@@ -73,25 +32,11 @@
 .read-value small, .memory-row small { font-size: 11px; color: var(--plot-muted); }
 .read-chart-axis { display: flex; justify-content: space-between; margin: .5rem 106px 0 88px; border-top: 1px solid var(--plot-rule); padding-top: .35rem; font-size: 11px; color: var(--plot-muted); }
 .page-comparison { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(160px, 1fr); gap: 3rem; }
-.kernel-measure { margin-bottom: 1rem; }
-.kernel-measure > div:first-child { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: .4rem; font-size: 13px; }
-.kernel-track { height: 12px; background: var(--plot-soft); }
-.kernel-track > span { display: block; height: 100%; min-width: 1px; transition: width 220ms ease; }
-.header-fill { background: var(--plot-header); fill: var(--plot-header); }
-.decoder-fill { background: var(--plot-decoder); fill: var(--plot-decoder); }
-.copy-fill { fill: var(--plot-copy); }
-.header-key:before, .decoder-key:before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: .45rem; background: var(--plot-header); }
-.decoder-key:before { background: var(--plot-decoder); }
 .page-units { display: flex; flex-direction: column; justify-content: center; gap: 1rem; }
 .page-units > div { display: flex; align-items: baseline; gap: .75rem; }
 .page-units strong { font-size: 26px; line-height: 1.2; font-weight: 400; }
 .page-units span { font-size: 12px; color: var(--plot-muted); }
 .trace-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0 1rem; margin-top: 2rem; }
-.trace-lanes { margin-top: .6rem; }
-.trace-lane { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: .75rem; align-items: center; font-size: 12px; margin: .6rem 0; }
-.trace-lane svg { width: 100%; height: 25px; overflow: visible; }
-.trace-rule { stroke: var(--plot-rule); stroke-width: 1; }
-.trace-axis { display: flex; justify-content: space-between; margin-left: 76px; color: var(--plot-muted); font-size: 11px; border-top: 1px solid var(--plot-rule); padding-top: .4rem; }
 .memory-head, .memory-row { display: grid; grid-template-columns: 90px 1fr 1fr; gap: 1.5rem; }
 .memory-head { font-size: 13px; margin-bottom: 1rem; }
 .memory-head > span > span { display: block; font-size: 11px; color: var(--plot-muted); }
@@ -113,10 +58,6 @@
 .unit-marks i { display: block; height: 10px; background: var(--plot-decoder); }
 .output-marks i { background: var(--plot-accent); }
 @media (max-width: 639px) {
-  .embedded-explorer { font-size: 14px; }
-  .embedded-explorer .explorer-kicker { font-size: 15px; }
-  .explorer-choices { gap: .2rem .9rem; }
-  .explorer-choices button { min-height: 44px; }
   .parquet-group { grid-template-columns: 1fr; gap: .6rem; }
   .row-group-label { display: flex; align-items: baseline; justify-content: space-between; min-height: 44px; }
   .read-chart-row { grid-template-columns: 57px 1fr 72px; gap: .5rem; }
@@ -131,4 +72,3 @@
   .output-units { grid-template-columns: 1fr; gap: 1.5rem; }
   .unit-marks { grid-template-columns: repeat(32, 1fr); }
 }
-@media (prefers-reduced-motion: reduce) { .kernel-track > span { transition: none; } }

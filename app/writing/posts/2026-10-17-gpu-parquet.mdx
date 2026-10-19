@@ -38,12 +38,11 @@ The GPU parallelism occurs in two main spots:
 
 Now that we know how the parquet reader works at a high level, we can see that the number of Pages and the Page size play a large part in determining performance. We ran two experiments. The first explored the results in Luo's paper regarding Page size. The second experiment held the Page size fixed to see how cuDF's parquet reader configuration led to different numbers of passes and sub-passes.
 
-> The experiments were run on an NVIDIA RTX 3090 with 24 GiB of VRAM, using a C++ reader built against libcudf 26.10 on Ubuntu 20.04 under WSL2. Files were stored under `/tmp` on WSL’s Linux filesystem and read with a warm cache. Compatibility I/O was enabled; GPUDirect Storage was not used. Read timings included metadata processing, allocation, file access, transfers, and GPU decoding, ending with GPU synchronization. GPU aggregation was timed separately, and every measured sum was checked against a CPU reference. The [full experiment report](https://github.com/sanjayyepuri/cudf_scratch/blob/main/experiments/REPORT.md) includes reproduction instructions and raw results. Note the repository was generated with GPT-6.1 Sol.
+> The experiments were run on an NVIDIA RTX 3090 with 24 GiB of VRAM, using a C++ reader built against libcudf 26.10 on Ubuntu 20.04 under WSL2. Compatibility I/O was enabled; GPUDirect Storage was not used. Read timings included metadata processing, allocation, file access, transfers, and GPU decoding, ending with GPU synchronization. GPU aggregation was timed separately, and every measured sum was checked against a CPU reference. The [full experiment report](https://github.com/sanjayyepuri/cudf_scratch/blob/main/experiments/REPORT.md) includes reproduction instructions and raw results. Note the repository was generated with GPT-6.1 Sol.
 
 ### Sweep on Page Sizes
 
 The first experiment was inspired by the paper; we generated a parquet file with the same amount of table data.  The parquet was laid out with 4 Row Groups, each with a single Column Chunk. Each Column Chunk had a different number of Pages based on the selected Page size.
-
 
 <details className="measurement-details">
 <summary>Exact page-size measurements</summary>
@@ -95,15 +94,6 @@ For memory measurements, we ran three additional rounds per configuration after 
 The 16 MiB and 64 MiB hints both required eight input passes, but the smaller hint increased subpasses from 32 to 248. It reduced peak live allocations from 94.36 MiB to 44.05 MiB while making reads about 6.4× slower. The hint therefore exposes a substantial memory–latency tradeoff, even when the input-pass count stays unchanged.
 
 Peak live RMM allocations count requests through the tracked allocator, including temporaries and output tables. They do not measure process-exclusive physical VRAM residency under WSL. These measurements also assume each returned table is released before the next is retained.
-
-<details>
-<summary>More detail: input passes, subpasses, and output tables</summary>
-
-The traces distinguish these boundaries. At a fixed 64 MiB pass hint, an 8 MiB output hint returned 128 tables while the reader still used 32 subpasses. Smaller returned tables therefore do not necessarily imply more subpasses.
-
-<OutputExplorer />
-
-</details>
 
 ## Closing Out
 

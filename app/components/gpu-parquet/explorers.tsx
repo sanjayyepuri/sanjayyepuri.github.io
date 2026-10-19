@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, type ReactNode, type CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
+import { Explorer, ExplorerCaption, ExplorerChoices, ExplorerExplanation, ExplorerMetric, ExplorerTimeline } from '../explorer'
 import measurements from './measurements.json'
 import './explorers.css'
 
@@ -9,22 +10,13 @@ const fmt = (n: number, digits = 2) => n.toLocaleString('en-US', { minimumFracti
 const hint = (n: number) => n === 0 ? 'Unlimited' : `${n} MiB`
 const width = (n: number): CSSProperties => ({ width: `${n}%` })
 
-function Caption({ number, children, report }: { number: number; children: ReactNode; report?: string }) {
-  return <figcaption><span className="explorer-number">Figure {number}.</span> {children}{report && <> <a href={source + report} target="_blank" rel="noopener noreferrer">Data &amp; method ↗</a></>}</figcaption>
-}
-
-function Choices({ label, options, selected, onChange }: { label: string; options: string[]; selected: number; onChange: (i: number) => void }) {
-  return <div className="explorer-choices" role="group" aria-label={label}>{options.map((option, i) => <button key={option} type="button" aria-pressed={selected === i} onClick={() => onChange(i)}>{option}</button>)}</div>
-}
-
 export function ParquetLayout() {
   const [level, setLevel] = useState(0)
   const [group, setGroup] = useState(0)
   const [column, setColumn] = useState(0)
   const labels = ['Row Groups', 'Column Chunks', 'Pages']
-  return <figure className="embedded-explorer layout-explorer" aria-label="Explore the Parquet hierarchy">
-    <div className="explorer-kicker">One table, three levels</div>
-    <Choices label="Level of the Parquet hierarchy" options={labels} selected={level} onChange={setLevel} />
+  return <Explorer className="gpu-parquet-explorer layout-explorer" label="Parquet Hierarchy" title="Parquet Data Structure">
+    <ExplorerChoices<number> label="Level of the Parquet hierarchy" options={labels.map((label, value) => ({ label, value }))} value={level} onChange={setLevel} />
     <div className="parquet-file">
       {[0, 1].map(r => <div key={r} className={`parquet-group ${group === r ? 'is-current' : ''}`}>
         <button type="button" className="row-group-label" aria-pressed={group === r} onClick={() => setGroup(r)}>Row Group {r + 1}<span>{r === 0 ? 'first rows' : 'next rows'}</span></button>
@@ -37,13 +29,13 @@ export function ParquetLayout() {
       </div>)}
       <div className="parquet-footer"><span>Metadata footer</span><span>locations + statistics</span></div>
     </div>
-    <div className="explorer-explanation" aria-live="polite">
+    <ExplorerExplanation>
       {level === 0 && <>Row Group {group + 1} contains a horizontal slice of the table: the same rows across every column.</>}
       {level === 1 && <>Column Chunk {'ABC'[column]} holds one column’s values for Row Group {group + 1}. Select another chunk to follow its place in the file.</>}
       {level === 2 && <>Inside Column Chunk {'ABC'[column]}, Pages hold the encoded values. The reader walks their headers, then decodes their contents.</>}
-    </div>
-    <Caption number={1}>Select a level, then a Row Group or Column Chunk. This is a schematic; the four Page marks illustrate nesting, not the benchmark’s Page count.</Caption>
-  </figure>
+    </ExplorerExplanation>
+    <ExplorerCaption number={1}>Select a level, then a Row Group or Column Chunk.</ExplorerCaption>
+  </Explorer>
 }
 
 export function PageSizeExplorer() {
@@ -56,8 +48,7 @@ export function PageSizeExplorer() {
     'With 16 Pages per Column Chunk, headers are cheaper again, while value decoding takes longer. End-to-end read time remains close to the 256 KiB layout.',
     'Only one Page remains per Column Chunk. The value decoder launches just four blocks, and decoding those large Pages dominates the measured kernel time.',
   ]
-  return <figure className="embedded-explorer" aria-label="Interactive page-size experiment">
-    <div className="explorer-kicker">Change the Page size. Follow the cost.</div>
+  return <Explorer className="gpu-parquet-explorer" label="Interactive page-size experiment" title="Page Size Results">
     <div className="explorer-note">Select a measured layout. The timings and trace below follow your selection.</div>
     <div className="read-chart" role="group" aria-label="Page target">
       <div className="read-chart-heading"><span>Page target</span><span>Unprofiled read · ms</span></div>
@@ -68,52 +59,56 @@ export function PageSizeExplorer() {
     </div>
     <div className="page-comparison">
       <div>
-        <div className="explorer-subheading">Where the kernel time goes</div>
-        <div className="kernel-measure"><div><span className="header-key">Page headers</span><span>{fmt(p.header, 3)} ms</span></div><div className="kernel-track"><span className="header-fill" style={width(p.header / 10 * 100)} /></div></div>
-        <div className="kernel-measure"><div><span className="decoder-key">Value decoding</span><span>{fmt(p.decoder, 3)} ms</span></div><div className="kernel-track"><span className="decoder-fill" style={width(p.decoder / 10 * 100)} /></div></div>
+        <div className="explorer-subheading">Kernel Runtime</div>
+        <ExplorerMetric label="Page headers" value={p.header} max={10} displayValue={`${fmt(p.header, 3)} ms`} color="var(--plot-header)" />
+        <ExplorerMetric label="Value decoding" value={p.decoder} max={10} displayValue={`${fmt(p.decoder, 3)} ms`} color="var(--plot-decoder)" />
         <div className="explorer-note">Both bars share a 0–10 ms scale. Separate profiled medians.</div>
       </div>
       <div className="page-units" aria-live="polite"><div><strong>{p.perChunk.toLocaleString('en-US')}</strong><span>Pages / Column Chunk</span></div><div><strong>{p.pages.toLocaleString('en-US')}</strong><span>data-decoder blocks</span></div></div>
     </div>
-    <div className="explorer-explanation" aria-live="polite">{explanations[selected]}</div>
-    <div className="trace-heading"><span className="explorer-subheading">The recorded read</span><span className="explorer-note">{p.label} · first measured profiled iteration</span></div>
-    <div className="trace-lanes" role="img" aria-label={`${p.label} recorded CUDA timeline, from 0 to 32 milliseconds. Separate kernel and memory-copy lanes.`}>
-      {['kernel', 'memcpy'].map(kind => <div className="trace-lane" key={kind}><span>{kind === 'kernel' ? 'Kernels' : 'Copies'}</span><svg viewBox="0 0 1000 30" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="15" x2="1000" y2="15" className="trace-rule" />{p.events.filter(e => e[0] === kind).map((e, i) => <rect key={i} x={Number(e[1]) / 32 * 1000} y="3" width={Math.max(Number(e[2]) / 32 * 1000, .8)} height="24" className={kind === 'kernel' ? 'decoder-fill' : 'copy-fill'} />)}</svg></div>)}
-      <div className="trace-axis"><span>0</span><span>8</span><span>16</span><span>24</span><span>32 ms</span></div>
-    </div>
-    <Caption number={3}>The same 8,388,608 INT64 values, four Row Groups, warm cache. Read bars show unprofiled medians; whiskers show observed min–max. Traces are separate profiled reads, not SM utilization. Subpixel events are widened for visibility. All layouts launched 33 kernels. <span className="explorer-source-note">No interpolated benchmark results.</span></Caption>
+    <ExplorerExplanation>{explanations[selected]}</ExplorerExplanation>
+    <div className="trace-heading"><span className="explorer-subheading">Kernel Launch Timeline</span><span className="explorer-note">{p.label} · first measured profiled iteration</span></div>
+    <ExplorerTimeline
+      label={`${p.label} recorded CUDA timeline, from 0 to 32 milliseconds. Separate kernel and memory-copy lanes.`}
+      max={32}
+      lanes={['kernel', 'memcpy'].map(kind => ({
+        label: kind === 'kernel' ? 'Kernels' : 'Copies',
+        color: kind === 'kernel' ? 'var(--plot-decoder)' : 'var(--plot-copy)',
+        events: p.events.filter(e => e[0] === kind).map(e => ({ start: Number(e[1]), duration: Number(e[2]) })),
+      }))}
+      ticks={[0, 8, 16, 24, 32].map(value => ({ value, label: value === 32 ? '32 ms' : value }))}
+    />
+    <ExplorerCaption number={3}>The same 8,388,608 INT64 values, four Row Groups, warm cache. Read bars show unprofiled medians; whiskers show observed min–max. Traces are separate profiled reads, not SM utilization. Subpixel events are widened for visibility. All layouts launched 33 kernels. <span className="explorer-source-note">No interpolated benchmark results.</span></ExplorerCaption>
     <a className="explorer-source" href={source + 'results-pages-traced/report.md'} target="_blank" rel="noopener noreferrer">Measurements and trace methodology ↗</a>
-  </figure>
+  </Explorer>
 }
 
 export function MemoryExplorer() {
   const runs = measurements.runs.filter(r => r.outputHint === 0)
   const [selected, setSelected] = useState(2)
   const run = runs[selected]
-  return <figure className="embedded-explorer" aria-label="Interactive pass-memory experiment">
-    <div className="explorer-kicker">A smaller working set has a cost</div>
+  return <Explorer className="gpu-parquet-explorer" label="Interactive pass-memory experiment" title="Memory-Runtime Tradeoff">
     <div className="explorer-control-label">Pass-memory hint <span>output limit disabled</span></div>
-    <Choices label="Pass-memory hint" options={runs.map(r => hint(r.passHint))} selected={selected} onChange={setSelected} />
+    <ExplorerChoices<number> label="Pass-memory hint" options={runs.map((r, value) => ({ label: hint(r.passHint), value }))} value={selected} onChange={setSelected} />
     <div className="memory-comparison" role="group" aria-label="Measured memory and latency comparison">
       <div className="memory-head"><span>Pass hint</span><span>Peak live RMM<span>0–2,000 MiB</span></span><span>Baseline read<span>0–7,000 ms</span></span></div>
       {runs.map((r, i) => <div className={`memory-row ${selected === i ? 'is-current' : ''}`} key={r.passHint}><span>{hint(r.passHint)}</span><div><span className="memory-meter"><span style={width(r.memory / 2000 * 100)} /></span><span>{fmt(r.memory)} <small>MiB</small></span></div><div><span className="latency-meter"><span style={width(r.read / 7000 * 100)} /></span><span>{fmt(r.read)} <small>ms</small></span></div></div>)}
     </div>
     <div className="batch-counts" aria-live="polite"><div><strong>{run.passes}</strong><span>input passes</span></div><span aria-hidden="true">→</span><div><strong>{run.subpasses}</strong><span>subpasses</span></div><span aria-hidden="true">→</span><div><strong>{run.outputs}</strong><span>output tables</span></div></div>
-    <div className="explorer-explanation" aria-live="polite">{run.passHint === 0 ? <>With the hint disabled, the reader uses one input pass and one subpass. It is fastest here, but peak tracked allocations reach {fmt(run.memory)} MiB.</> : <>At a {hint(run.passHint)} hint, peak live allocations are <strong>{fmt(run.memory)} MiB</strong> and reads take <strong>{fmt(run.read / runs[0].read, 1)}×</strong> as long as the unlimited baseline.{run.passHint === 16 || run.passHint === 64 ? ' The 16 and 64 MiB settings both use eight input passes; their subpass counts differ sharply.' : ''}</>}</div>
-    <Caption number={4} report="results-subpasses/memory-report.md">Measured configurations, on shared linear scales. Memory was measured separately from timing. Each returned table is consumed and released; the hint is not a cap on total memory.</Caption>
-  </figure>
+    <ExplorerExplanation>{run.passHint === 0 ? <>With the hint disabled, the reader uses one input pass and one subpass. It is fastest here, but peak tracked allocations reach {fmt(run.memory)} MiB.</> : <>At a {hint(run.passHint)} hint, peak live allocations are <strong>{fmt(run.memory)} MiB</strong> and reads take <strong>{fmt(run.read / runs[0].read, 1)}×</strong> as long as the unlimited baseline.{run.passHint === 16 || run.passHint === 64 ? ' The 16 and 64 MiB settings both use eight input passes; their subpass counts differ sharply.' : ''}</>}</ExplorerExplanation>
+    <ExplorerCaption number={4} source={{ href: source + "results-subpasses/memory-report.md", label: "Data & method" }}>Measured configurations, on shared linear scales. Memory was measured separately from timing. Each returned table is consumed and released; the hint is not a cap on total memory.</ExplorerCaption>
+  </Explorer>
 }
 
 export function OutputExplorer() {
   const runs = measurements.runs.filter(r => r.passHint === 64)
   const [selected, setSelected] = useState(0)
   const run = runs[selected]
-  return <figure className="embedded-explorer" aria-label="Explore output tables versus subpasses">
-    <div className="explorer-kicker">An output boundary is a different boundary</div>
+  return <Explorer className="gpu-parquet-explorer" label="Explore output tables versus subpasses" title="Output Table Output">
     <div className="explorer-control-label">Output-table hint <span>pass hint fixed at 64 MiB</span></div>
-    <Choices label="Output-table hint" options={runs.map(r => hint(r.outputHint))} selected={selected} onChange={setSelected} />
+    <ExplorerChoices<number> label="Output-table hint" options={runs.map((r, value) => ({ label: hint(r.outputHint), value }))} value={selected} onChange={setSelected} />
     <div className="output-units"><div><span>Subpasses</span><strong>32</strong><div className="unit-marks" aria-hidden="true">{Array.from({ length: 32 }, (_, i) => <i key={i} />)}</div></div><div><span>Returned tables</span><strong>{run.outputs}</strong><div className="unit-marks output-marks" aria-hidden="true">{Array.from({ length: run.outputs }, (_, i) => <i key={i} />)}</div></div></div>
-    <div className="explorer-explanation" aria-live="polite">{run.outputHint === 8 ? 'The 8 MiB output hint produces four times as many returned tables, while the subpass count stays at 32.' : `The ${hint(run.outputHint).toLowerCase()} output hint returns 32 tables across 32 subpasses.`} Peak live allocations remain {fmt(run.memory)} MiB. Baseline read: {fmt(run.read)} ms.</div>
-    <Caption number={5} report="results-subpasses/report.md">Each mark represents one subpass or one returned table. These are observed counts for the fixed 64 MiB pass-hint experiment.</Caption>
-  </figure>
+    <ExplorerExplanation>{run.outputHint === 8 ? 'The 8 MiB output hint produces four times as many returned tables, while the subpass count stays at 32.' : `The ${hint(run.outputHint).toLowerCase()} output hint returns 32 tables across 32 subpasses.`} Peak live allocations remain {fmt(run.memory)} MiB. Baseline read: {fmt(run.read)} ms.</ExplorerExplanation>
+    <ExplorerCaption number={5} source={{ href: source + "results-subpasses/report.md", label: "Data & method" }}>Each mark represents one subpass or one returned table. These are observed counts for the fixed 64 MiB pass-hint experiment.</ExplorerCaption>
+  </Explorer>
 }
