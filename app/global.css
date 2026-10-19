@@ -218,9 +218,10 @@ body:has(.technical-post) .flex-1 { min-width: 0; }
 .technical-post .prose h3 { margin-top: 2.5rem; font-size: 21px; }
 .technical-post .prose li { margin: .6rem 0; }
 .technical-post .prose blockquote { border-left: 2px solid #8888; padding: .1rem 1.25rem; margin: 1.5rem 0; font-size: .9em; }
-.technical-post .prose .suggested-analysis { max-width: 680px; margin: 1.5rem 0; padding: .9rem 1.15rem; border: 1px solid #bae6fd; border-left: 3px solid #38bdf8; border-radius: 6px; background: #f0f9ff; }
+.technical-post .prose .suggested-analysis { max-width: 680px; margin: 1.5rem 0; color: #0369a1; }
 .technical-post .prose .suggested-analysis blockquote { margin: 0; padding: 0; border: 0; font-size: .9em; }
-.dark .technical-post .prose .suggested-analysis { border-color: #0c4a6e; border-left-color: #38bdf8; background: #082f49; }
+.technical-post .prose .suggested-analysis p { color: inherit; }
+.dark .technical-post .prose .suggested-analysis { color: #7dd3fc; }
 .technical-post .prose code { font-size: .85em; background: #8882; overflow-wrap: anywhere; }
 .table-scroll { max-width: 100%; overflow-x: auto; margin: 1.75rem 0; border: 1px solid #8885; border-radius: 6px; }
 .table-scroll:focus-visible { outline: 2px solid #38bdf8; outline-offset: 3px; }
