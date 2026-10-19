@@ -6,6 +6,7 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
 import { basePath } from 'app/sitemap'
+import { ParquetLayout, ReaderPipeline, PageSizeExplorer, MemoryExplorer, OutputExplorer } from './gpu-parquet/explorers'
 
 function Table({ data }) {
   let headers = data.headers.map((header, index) => (
@@ -131,6 +132,11 @@ let components = {
   code: Code,
   Table,
   Figure,
+  ParquetLayout,
+  ReaderPipeline,
+  PageSizeExplorer,
+  MemoryExplorer,
+  OutputExplorer,
 }
 
 export function CustomMDX(props) {
