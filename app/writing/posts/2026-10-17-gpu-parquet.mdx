@@ -29,8 +29,6 @@ For our discussion, we will focus on how the reader manages compressed and decom
 
 The core algorithm for decoding parquet is fairly straightforward. The chunked reader groups selected row groups into input passes and loads their encoded column chunks. It then uses page metadata to plan subpasses for decompression and decoding. `pass_read_limit` influences this batching, but is a soft hint rather than a cap on total GPU memory. A separate control, `chunk_read_limit`, governs the size of returned output tables.
 
-<ReaderPipeline />
-
 The GPU parallelism occurs in two main spots:
 
 - Header kernels walk page headers within each column chunk, collecting information used to plan processing and allocate buffers. In this experiment, they assigned one warp per column chunk.

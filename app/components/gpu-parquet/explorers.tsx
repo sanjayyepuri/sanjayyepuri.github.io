@@ -46,23 +46,6 @@ export function ParquetLayout() {
   </figure>
 }
 
-const stages = [
-  { title: 'Load chunks', label: 'Input pass', text: 'Selected Row Groups are grouped into input passes. Their encoded Column Chunks are loaded for processing.', unit: 'Encoded Column Chunks', control: 'pass_read_limit influences input-pass planning.' },
-  { title: 'Read headers', label: 'Page metadata', text: 'Header kernels walk the Page headers within each Column Chunk. In this measured path, one warp handles each Column Chunk, so more Pages mean more serial header work.', unit: 'One warp / Column Chunk', control: 'Page layout determines how much header work each warp performs.' },
-  { title: 'Decode pages', label: 'Subpass', text: 'Page metadata is used to plan subpasses for decompression and decoding. In this fixed-width path, the value decoder launches one block per data Page.', unit: 'One block / data Page', control: 'pass_read_limit also influences subpass planning.' },
-  { title: 'Return tables', label: 'Output', text: 'Decoded values are returned as tables. An output boundary is distinct from a subpass boundary: one subpass can produce several returned tables.', unit: 'Returned output tables', control: 'chunk_read_limit governs the size of returned tables.' },
-]
-export function ReaderPipeline() {
-  const [selected, setSelected] = useState(1)
-  const stage = stages[selected]
-  return <figure className="embedded-explorer" aria-label="Explore the cuDF reader stages">
-    <div className="explorer-kicker">Follow the bytes</div>
-    <div className="reader-stages" role="group" aria-label="Reader stage">{stages.map((s, i) => <button type="button" key={s.title} onClick={() => setSelected(i)} aria-pressed={selected === i}><span className="stage-index">0{i + 1}</span><span>{s.title}</span><small>{s.label}</small></button>)}</div>
-    <div className="reader-detail" aria-live="polite"><div className="reader-unit">{stage.unit}</div><p>{stage.text}</p><div className="explorer-note">{stage.control}</div></div>
-    <Caption number={2}>Select a stage to see its unit of work. Reader hints influence batching; they do not cap total GPU memory.</Caption>
-  </figure>
-}
-
 export function PageSizeExplorer() {
   const [selected, setSelected] = useState(2)
   const p = measurements.pages[selected]

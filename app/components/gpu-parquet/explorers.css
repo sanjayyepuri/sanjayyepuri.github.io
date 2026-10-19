@@ -8,8 +8,8 @@
   --plot-decoder: #604095;
   --plot-copy: #00515d;
   color: var(--plot-ink);
-  margin: 2.5rem 0;
-  padding: 1.25rem 0;
+  margin: 1.5rem 0;
+  padding: .5rem 0;
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.55;
@@ -37,7 +37,7 @@
 .explorer-choices button[aria-pressed="true"] { border-color: var(--plot-accent); color: var(--plot-ink); }
 .embedded-explorer button:focus-visible { outline: 2px solid var(--plot-accent); outline-offset: 4px; }
 .embedded-explorer button:hover { color: var(--plot-ink); }
-.embedded-explorer .explorer-explanation { margin-top: 1.25rem; max-width: 680px; min-height: 4.7em; }
+.embedded-explorer .explorer-explanation { margin-top: .9rem; max-width: 680px; min-height: 3.2em; }
 .explorer-control-label { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .35rem 1rem; }
 .explorer-control-label > span { color: var(--plot-muted); font-size: 13px; }
 .explorer-subheading { font-weight: 500; margin-bottom: .8rem; }
@@ -59,15 +59,6 @@
 .level-2 .parquet-column.is-current .parquet-pages > span { background: color-mix(in srgb, var(--plot-accent) 22%, transparent); }
 .parquet-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5rem; padding: .75rem 0; font-size: 13px; }
 .parquet-footer span:last-child { color: var(--plot-muted); }
-.reader-stages { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
-.reader-stages button { border-top: 2px solid var(--plot-rule); padding: .7rem 0; }
-.reader-stages button[aria-pressed="true"] { border-color: var(--plot-accent); }
-.reader-stages button > span, .reader-stages small { display: block; }
-.reader-stages small, .stage-index { color: var(--plot-muted); font-size: 12px; }
-.stage-index { font-family: var(--font-departure), monospace; margin-bottom: .5rem; }
-.reader-detail { max-width: 680px; min-height: 205px; padding-top: 1.25rem; }
-.reader-unit { font-family: var(--font-departure), monospace; color: var(--plot-ink); }
-.technical-post .prose .reader-detail p { color: var(--plot-ink); margin: .65rem 0; }
 .read-chart { margin: 1.5rem 0 2rem; }
 .read-chart-heading { display: flex; justify-content: space-between; color: var(--plot-muted); font-size: 12px; padding-bottom: .5rem; }
 .read-chart-row { width: 100%; display: grid; grid-template-columns: 72px 1fr 90px; gap: 1rem; align-items: center; min-height: 46px; padding: .4rem 0; }
@@ -128,8 +119,6 @@
   .explorer-choices button { min-height: 44px; }
   .parquet-group { grid-template-columns: 1fr; gap: .6rem; }
   .row-group-label { display: flex; align-items: baseline; justify-content: space-between; min-height: 44px; }
-  .reader-stages { grid-template-columns: repeat(2, 1fr); }
-  .reader-detail { min-height: 240px; }
   .read-chart-row { grid-template-columns: 57px 1fr 72px; gap: .5rem; }
   .read-chart-axis { margin-left: 65px; margin-right: 80px; }
   .page-comparison { grid-template-columns: 1fr; gap: 1.25rem; }

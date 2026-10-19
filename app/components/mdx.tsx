@@ -6,7 +6,7 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
 import { basePath } from 'app/sitemap'
-import { ParquetLayout, ReaderPipeline, PageSizeExplorer, MemoryExplorer, OutputExplorer } from './gpu-parquet/explorers'
+import { ParquetLayout, PageSizeExplorer, MemoryExplorer, OutputExplorer } from './gpu-parquet/explorers'
 
 function Table({ data }) {
   let headers = data.headers.map((header, index) => (
@@ -133,7 +133,6 @@ let components = {
   Table,
   Figure,
   ParquetLayout,
-  ReaderPipeline,
   PageSizeExplorer,
   MemoryExplorer,
   OutputExplorer,
