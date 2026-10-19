@@ -232,7 +232,8 @@ body:has(.technical-post) .flex-1 { min-width: 0; }
 .article-figure figcaption { max-width: 760px; margin-top: .85rem; color: #525252; font-size: 13px; line-height: 1.65; }
 .dark .article-figure figcaption { color: #b5b5b5; }
 .figure-number { font-weight: 600; }
-.technical-post .prose details { max-width: 100%; margin-top: 2rem; padding: 1rem 0; }
+.technical-post .prose details { max-width: 100%; margin: .75rem 0; padding: .25rem 0; }
+.technical-post .measurement-details .table-scroll { margin: .75rem 0; }
 .technical-post summary { cursor: pointer; font-size: 15px; font-weight: 500; }
 @media (max-width: 639px) {
   .technical-post .prose { font-size: 16px; }
