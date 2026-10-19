@@ -39,7 +39,7 @@ export function ParquetLayout() {
 }
 
 export function PageSizeExplorer() {
-  const [scale, setScale] = useState<'large' | 'original'>('large')
+  const [scale, setScale] = useState<'large' | 'original'>('original')
   const [selected, setSelected] = useState(2)
   const pages = scale === 'large' ? measurements.largePages : measurements.pages
   const p = pages[selected]
@@ -77,7 +77,7 @@ export function PageSizeExplorer() {
 }
 
 export function MemoryExplorer() {
-  const [scale, setScale] = useState<'large' | 'original'>('large')
+  const [scale, setScale] = useState<'large' | 'original'>('original')
   const runs = (scale === 'large' ? measurements.largeRuns : measurements.runs).filter(r => r.outputHint === 0)
   const [selected, setSelected] = useState(2)
   const run = runs[selected]
